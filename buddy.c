@@ -11,6 +11,18 @@
 #define MIN_BLOCK_SIZE      4096 //2^12 = 4K
 #define MIN_BLOCK_SIZE_EXP  12
 
+#define MEM_FIRST_ADDRESS  0x600000 //esta bien la dir?
+
+#define NODES_QTY() {                                           \
+  int suma = 0;                                                 \
+  for( i = 0; i < MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1; i++){  \
+    suma += 1 << i;                                             \
+  }                                                             \
+  return suma;                                                  \
+} //no funca
+
+
+
 typedef struct node{ 
   int state; 
   struct node *left; 
@@ -21,10 +33,10 @@ typedef struct node{
 }node;
 
 
-static node *mem; //Initialized in main function.
-static node root = {FREE, NULL, NULL, NULL, 0x600000, MEM_SIZE_EXP}; //esta bien la dir?
+static node mem[]; //Initialized in main function.
+static node root = {FREE, NULL, NULL, NULL, MEM_FIRST_ADDRESS, MEM_SIZE_EXP}; //O LO DECLARAMOS COMO *node
 
-unsigned long node_qty(){
+unsigned long nodes_qty(){
   long suma = 0;
 
   for(int i = 0; i < MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1; i++)
@@ -45,10 +57,22 @@ unsigned int exp_of_block_needed(unsigned int request){
   return exp;
 }
 
+unsigned int look_for_space(){
+  int i = 0;
+  
+  //ESTA BIEN mem+i != NULL?
+  while(mem+i != NULL && i < nodes_qty()) //es necesaria la segunda validacion?
+    i++;
+
+  return i;
+}
+
 void split_node(node *n){ //REVISAR ESTA FUNCION (PUNTEROS, DIRECCIONES, ETC) !!!
   //como inicializamos los hijos???
-  *n->left = mem[0];  //cambiar dir
-  *n->right = mem[0]; //cambiar dir
+  unsigned int i = look_for_space();
+  *n->left = mem[i];  //esta bien como asignamos la dir?
+  i = look_for_space();
+  *n->right = mem[i]; //esta bien como asignamos la dir?
   
   (*n->left).state = FREE;
   (*n->left).left = NULL;
@@ -61,7 +85,8 @@ void split_node(node *n){ //REVISAR ESTA FUNCION (PUNTEROS, DIRECCIONES, ETC) !!
   (*n->right).left = NULL;
   (*n->right).right = NULL;
   (*n->right).parent = n;
-  (*n->right).ptr = n->ptr + (n->ptr) / 2;  //chequear direccion de inicio
+  (*n->right).ptr = n->ptr + (1 << (n->exp-1));  //left node begin address + size of (left) block
+  //chequear direccion de inicio
   (*n->right).exp = n->exp-1;
   
   n->state = SPLIT;
@@ -86,7 +111,7 @@ void *buddy_malloc_recursive(node *n, unsigned int exp_request){
     case OCCUPIED:
       return NULL;
 
-    case SPLIT:
+    case SPLIT: /* Revisar, no siempre hay que ir para la izquierda, tal vez tu hermano ya esta splitted. */
       void *aux = buddy_malloc_recursive(n->left, exp_request);
       if(aux != NULL)
         return aux;
@@ -114,7 +139,7 @@ int main(){
   //o inicializar root aca?
 
   /* Memory for nodes initialization */
-  long size = sizeof(node)*nodes_qty();
+  long size = sizeof(node) * nodes_qty();
   node aux[size];
   *mem = *aux;
 
