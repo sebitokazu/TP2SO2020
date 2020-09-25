@@ -30,11 +30,12 @@ typedef struct node{
   struct node *parent;  //tal vez no lo usemos
   void *ptr;
   int exp; //size = 2^exp
+  int idx;
 }node;
 
 
 static node mem[]; //Initialized in main function.
-static node root = {FREE, NULL, NULL, NULL, MEM_FIRST_ADDRESS, MEM_SIZE_EXP}; //O LO DECLARAMOS COMO *node
+static node root = {FREE, NULL, NULL, NULL, MEM_FIRST_ADDRESS, MEM_SIZE_EXP, 0}; //O LO DECLARAMOS COMO *node
 
 unsigned long nodes_qty(){
   long suma = 0;
@@ -57,22 +58,12 @@ unsigned int exp_of_block_needed(unsigned int request){
   return exp;
 }
 
-unsigned int look_for_space(){
-  int i = 0;
-  
-  //ESTA BIEN mem+i != NULL?
-  while(mem+i != NULL && i < nodes_qty()) //es necesaria la segunda validacion?
-    i++;
-
-  return i;
-}
 
 void split_node(node *n){ //REVISAR ESTA FUNCION (PUNTEROS, DIRECCIONES, ETC) !!!
   //como inicializamos los hijos???
-  unsigned int i = look_for_space();
-  *n->left = mem[i];  //esta bien como asignamos la dir?
-  i = look_for_space();
-  *n->right = mem[i]; //esta bien como asignamos la dir?
+  int i = n->idx;
+  *n->left = mem[2*i + 1];
+  *n->right = mem[2*i + 2];
   
   (*n->left).state = FREE;
   (*n->left).left = NULL;
@@ -80,6 +71,7 @@ void split_node(node *n){ //REVISAR ESTA FUNCION (PUNTEROS, DIRECCIONES, ETC) !!
   (*n->left).parent = n;
   (*n->left).ptr = n->ptr;  //chequear direccion de inicio
   (*n->left).exp = n->exp-1;
+  (*n->left).idx = 2*i+1;
   
   (*n->right).state = FREE;
   (*n->right).left = NULL;
@@ -88,9 +80,12 @@ void split_node(node *n){ //REVISAR ESTA FUNCION (PUNTEROS, DIRECCIONES, ETC) !!
   (*n->right).ptr = n->ptr + (1 << (n->exp-1));  //left node begin address + size of (left) block
   //chequear direccion de inicio
   (*n->right).exp = n->exp-1;
+  (*n->right).idx = 2*i+2;
   
   n->state = SPLIT;
 }
+
+//mem {0: 2^0, 1: 2^1, 2: 2^2} 2^5 -> 2^0+2^1+2^2+2^3+2^4 hasta 2^0+2^1+2^2+2^3+2^4+2^5-1
 
 void *buddy_malloc_recursive(node *n, unsigned int exp_request){
   //n->exp < exp_request cannot happen.
@@ -106,16 +101,16 @@ void *buddy_malloc_recursive(node *n, unsigned int exp_request){
   switch(n->state){
     case FREE:
       split_node(n);
-      break;
-
-    case OCCUPIED:
-      return NULL;
+      //break does not correspond here, now is splitted
 
     case SPLIT: /* Revisar, no siempre hay que ir para la izquierda, tal vez tu hermano ya esta splitted. */
       void *aux = buddy_malloc_recursive(n->left, exp_request);
       if(aux != NULL)
         return aux;
       return buddy_malloc_recursive(n->right, exp_request); 
+
+    case OCCUPIED:
+      return NULL;
       
     default: //impossible
       return NULL;
