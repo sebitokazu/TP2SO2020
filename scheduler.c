@@ -2,25 +2,27 @@
 
 #include "process.h"
 
-static PCB* current = NULL;
+static PCB* readyList = NULL;
 
 unsigned int cant_process = 0;
+uint64_t readyListTimeCount = 0, previousTimeCount = 0;
 
 uint64_t schedule(uint64_t rsp) {
-    current->process->rsp = rsp;
+    cpuUsedTime();
+    readyList->process->rsp = rsp;
 
-    if (current->process->state == RUNNING)
-        current->process->state = READY;
+    if (readyList->process->state == RUNNING)
+        readyList->process->state = READY;
 
-    current = next();
-    current->process->state = RUNNING;
+    readyList = next();
+    readyList->process->state = RUNNING;
 
-    return current->process->rsp;
+    return readyList->process->rsp;
 }
 
 //aca iria el algoritmo tipo Round Robin etc.
 PCB* next() {
-    return current->next;
+    return readyList->next;
 }
 
 //solicita la creacion de un proceso, es a quien llama la syscall fork
@@ -34,32 +36,39 @@ void addToProcessList(process* process) {
     pcb->process = process;
     cant_process++;
 
-    if (current == NULL) {
-        current = pcb;
-        current->next = current;
+    if (readyList == NULL) {
+        readyList = pcb;
+        readyList->next = readyList;
     } else {
-        pcb->next = current->next;
-        current->next = pcb;
+        pcb->next = readyList->next;
+        readyList->next = pcb;
     }
 }
 
 void removeProcess(uint64_t pid) {
-    PCB* previousPCB = current;
-    PCB* currentPCB = current->next;
-    while (currentPCB->process->pid != pid) {
-        previousPCB = currentPCB;
-        currentPCB = currentPCB->next;
+    PCB* previousPCB = readyList;
+    PCB* readyListPCB = readyList->next;
+    while (readyListPCB->process->pid != pid) {
+        previousPCB = readyListPCB;
+        readyListPCB = readyListPCB->next;
     }
-    previousPCB->next = currentPCB->next;
-    freeProcess(currentPCB->process);
-    free(currentPCB);
+    previousPCB->next = readyListPCB->next;
+    freeProcess(readyListPCB->process);
+    free(readyListPCB);
     cant_process--;
 }
 
-process* getCurrentProcess() {
-    return current->process;
+process* getreadyListProcess() {
+    return readyList->process;
 }
 
-uint64_t getCurrentPID() {
-    return current->process->pid;
+uint64_t getreadyListPID() {
+    return readyList->process->pid;
+}
+
+void cpuUsedTime() {
+    readyListTimeCount = timerTickSecs();
+    uint64_t elapsed = previousTimeCount - readyListTimeCount;
+    previousTimeCount = readyListTimeCount;
+    readyList->cpuUsedTime += elapsed;
 }

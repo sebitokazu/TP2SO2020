@@ -5,6 +5,7 @@
 typedef struct PCB {
     process* process;
     PCB* next;
+    uint64_t cpuUsedTime;
 } PCB;
 
 uint64_t schedule(uint64_t rsp);
