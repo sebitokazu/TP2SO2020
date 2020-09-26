@@ -1,4 +1,5 @@
 #include "process.h"
+
 #include "mem_manager.h"
 
 #define STACK_SIZE 4096
@@ -6,32 +7,30 @@
 static uint64_t pids = 0;
 
 typedef struct stack_frame {
+    //General use registers
+    uint64_t r15;
+    uint64_t r14;
+    uint64_t r13;
+    uint64_t r12;
+    uint64_t r11;
+    uint64_t r10;
+    uint64_t r9;
+    uint64_t r8;
+    uint64_t rsi;
+    uint64_t rdi;
+    uint64_t rbp;
+    uint64_t rdx;
+    uint64_t rcx;
+    uint64_t rbx;
+    uint64_t rax;
 
     //iretq registers
-    uint64_t base;
     uint64_t rip;
     uint64_t cs;
     uint64_t eflags;
     uint64_t rsp;
     uint64_t ss;
-
-    //General use registers
-    uint64_t rax;
-    uint64_t rbx;
-    uint64_t rcx;
-    uint64_t rdx;
-    uint64_t rbp;
-    uint64_t rdi;
-    uint64_t rsi;
-    uint64_t r8;
-    uint64_t r9;
-    uint64_t r10;
-    uint64_t r11;
-    uint64_t r12;
-    uint64_t r13;
-    uint64_t r14;
-    uint64_t r15;
-        
+    uint64_t base;
 
 } stack_frame;
 
@@ -50,9 +49,48 @@ rsi=argv
 Sug: iniciarlos incrementalmente para debugging
 */
 
+static void reverse(char* str, int len) {
+    int i = 0, j = len - 1, temp;
+    while (i < j) {
+        temp = str[i];
+        str[i] = str[j];
+        str[j] = temp;
+        i++;
+        j--;
+    }
+}
+
+static int intToStr(int x, char str[]) {
+    int i = 0;
+    if (x != 0) {
+        while (x) {
+            str[i++] = (x % 10) + '0';
+            x = x / 10;
+        }
+        reverse(str, i);
+        str[i] = '\0';
+    } else {
+        str[0] = '0';
+        str[1] = '\0';
+        return 1;
+    }
+    return i;
+}
+
+void printStackFrame(uint64_t* rsp) {
+    int i;
+    char aux[65];
+    for (i = 0; i < 21; i++) {
+        intToStr(rsp[i], aux);
+        drawWord(aux);
+        jumpLine();
+    }
+}
+
 process* createProcess(void* entry_point, int argc, char* argv[]) {
     process* new_process = (process*)my_malloc(sizeof(process*));
     new_process->rsp = createStackFrame(my_malloc(STACK_SIZE), entry_point, argc, argv);
+    printStackFrame(new_process->rsp);
     new_process->pid = pids++;
     new_process->state = READY;
 
@@ -65,7 +103,7 @@ void freeProcess(process* process) {
 }
 
 void* createStackFrame(void* stack_base, void* entry_point, int argc, char* argv[]) {
-    stack_frame* stack_frame = (char*)stack_base;
+    stack_frame* stack_frame = ((char*)stack_base + STACK_SIZE - sizeof(stack_frame));
     stack_frame->r15 = 0;
     stack_frame->r14 = 1;
     stack_frame->r13 = 2;
@@ -74,8 +112,8 @@ void* createStackFrame(void* stack_base, void* entry_point, int argc, char* argv
     stack_frame->r10 = 5;
     stack_frame->r9 = 6;
     stack_frame->r8 = 7;
-    stack_frame->rsi = 8;  //argv
-    stack_frame->rdi = 9;  //argc
+    stack_frame->rsi = argv;  //argv
+    stack_frame->rdi = argc;  //argc
     stack_frame->rbp = 10;
     stack_frame->rdx = 11;
     stack_frame->rcx = 12;
@@ -85,8 +123,8 @@ void* createStackFrame(void* stack_base, void* entry_point, int argc, char* argv
     stack_frame->rip = entry_point;
     stack_frame->cs = 0x8;
     stack_frame->eflags = 0x202;
-    stack_frame->rsp = stack_frame;  //?????
+    stack_frame->rsp = (char*)stack_base + STACK_SIZE - 1;  //?????
     stack_frame->ss = 0x0;
     stack_frame->base = stack_base;
-    return stack_frame + sizeof(stack_frame) + 1;
+    return ((char*)stack_base + STACK_SIZE - sizeof(stack_frame));
 }
