@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <types.h>
 
-void syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword r9);
+long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword r9);
 
 void setUp_syscalls();
 

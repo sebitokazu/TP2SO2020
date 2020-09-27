@@ -1,7 +1,7 @@
 #ifndef types_h
 #define types_h
 
-#include <stdio.h>
+//#include <stdio.h>
 
 typedef unsigned char byte;
 typedef short int word;

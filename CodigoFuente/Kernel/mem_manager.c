@@ -1,17 +1,18 @@
-#include <stdio.h>
-#include <string.h>
+#include "mem_manager.h"
+#include "lib.h"
 
 #define BLOCK_SIZE 1024
 #define BLOCK_QTY 4096
-#define INITIALBLOCK '*'
 
-typedef char bit;
+
+typedef int bit;
 
 //void* testMalloc(size_t size);
 //void testFree(void* ptr);
 
 char *memory = 0x600000; //revisar
 bit bitmap[BLOCK_QTY] = {0};
+int blocksUsed = 0;
 
 void* my_malloc(size_t size) {
     if (size == 0)
@@ -29,22 +30,24 @@ void* my_malloc(size_t size) {
 
     if (counter == needed) {
         int init_pos = i - needed;  //index of first block
-        bitmap[init_pos] = INITIALBLOCK;
+        bitmap[init_pos] = needed;
+        blocksUsed += needed;
         for (j = 1; j < needed; j++)
             bitmap[init_pos + j] = 1;
-        return (void*)(memory + (init_pos * BLOCK_SIZE));  //MAL, tendriamos que devolver needed cantidad de punteros (bloques)
+        return (void*)(memory + (init_pos * BLOCK_SIZE));  
     }
     return NULL;
 }
 
 void my_free(void* ptr) {
-    if (ptr == NULL)
+    if (ptr == NULL || ptr < memory)
         return;
     int init = ((char*)ptr - memory) / BLOCK_SIZE;
-    if (bitmap[init] == INITIALBLOCK) {
-        do {
+    if (bitmap[init] > 0) {
+        int toFreeBlocks = bitmap[init];
+        blocksUsed -= bitmap[init];
+        for( ;toFreeBlocks>0; toFreeBlocks--)
             bitmap[init++] = 0;
-        } while (bitmap[init] != 0 && bitmap[init] != INITIALBLOCK);
     }
 }
 
@@ -55,6 +58,19 @@ void initialize(void* base) {
     while (i < BLOCK_SIZE * BLOCK_QTY)
         mem[i++] = 0;
 }
+
+
+void checkMemoryStatus(){
+    drawWord("Total memory: 4194304 bytes");
+    jumpLine();
+    drawWord("Currently, you are using: ");
+    long bytesQty = blocksUsed*1024;
+    char buffer[30];
+    intToStr(bytesQty,buffer);
+    drawWord(buffer);
+    jumpLine();
+}
+
 
 /*void printBitmap() {
     int i;

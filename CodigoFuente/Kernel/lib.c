@@ -48,3 +48,30 @@ void * memcpy(void * destination, const void * source, uint64_t length)
 
 	return destination;
 }
+void reverse(char* str, int len) {
+    int i = 0, j = len - 1, temp;
+    while (i < j) {
+        temp = str[i];
+        str[i] = str[j];
+        str[j] = temp;
+        i++;
+        j--;
+    }
+}
+
+int intToStr(int x, char str[]) {
+    int i = 0;
+    if (x != 0) {
+        while (x) {
+            str[i++] = (x % 10) + '0';
+            x = x / 10;
+        }
+        reverse(str, i);
+        str[i] = '\0';
+    } else {
+        str[0] = '0';
+        str[1] = '\0';
+        return 1;
+    }
+    return i;
+}

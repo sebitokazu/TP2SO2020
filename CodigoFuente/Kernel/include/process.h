@@ -9,9 +9,11 @@
 #define DEAD 4
 
 typedef struct process {
-    void* rsp;
+    uint64_t rsp;
+    uint64_t stack_base;
     uint64_t pid;
     uint8_t state;
+    char *name;
 
 } process;
 

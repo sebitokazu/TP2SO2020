@@ -213,8 +213,12 @@ _irq05Handler:
 
 ;Interrupt80 - Syscalls
 _irq80Handler:
-    call syscall_handler
-    iretq
+	pushStateNoRax
+	
+	call syscall_handler
+	
+	popStateNoRax
+	iretq
 
 ;Zero Division Exception
 _exception0Handler:

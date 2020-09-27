@@ -1,6 +1,8 @@
 #include "scheduler.h"
 #include "mem_manager.h"
 #include "time.h"
+#include "video_driver.h"
+#include "lib.h"
 
 static PCB* readyList = NULL;
 
@@ -76,4 +78,27 @@ void cpuUsedTime() {
 
 void startScheduler(){
     ((int (*)(void))(getreadyListProcess()->rsp))();
+}
+
+void printProcesses(){
+    if(readyList == NULL)
+        return;
+    PCB *current = readyList;
+    int i;
+    char pidBuff[20];
+    for (i = 0; i < cant_process; i++)
+    {
+        drawWord(current->process->name);
+        drawWord(" - PID:");
+        intToStr(current->process->pid, pidBuff);
+        drawWord(pidBuff);
+        drawWord(" - RSP:");
+        intToStr(current->process->rsp, pidBuff);
+        drawWord(pidBuff);
+        drawWord(" - Base:");
+        intToStr(current->process->stack_base, pidBuff);
+        drawWord(pidBuff);
+        jumpLine();
+        current = current->next;
+    }
 }

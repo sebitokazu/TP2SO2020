@@ -1,4 +1,5 @@
 #include "shell.h"
+#include "processlib.h"
 
 #define PROMPT_MSG "ratti-galende@shell-service: "
 #define COMMAND_NOT_FOUND_MSG "Command not found :("
@@ -8,18 +9,24 @@
 #define INFOREG_DESC "inforeg --> Imprime la informacion que habia en los registros al momento de capturarlos. Para poder capturarlos presionar ctrl+r."
 #define PRINTMEM_DESC "printmem --> Recibe como argumento una direccion de memoria y realiza un volcado de memoria de 32 bytes a partir de la direccion recibida."
 #define SYSTIME_DESC "systime --> Impreme la hora del sistema."
-#define PROCESSOR_TEMP_DESC "processor-temp --> Imprime la temperatura del procesador" 
-#define PROCESSOR_INFO_DESC "processor-info --> Imprime informacion sobre el procesador"
-#define CLEAR_DESC "clear --> Borra todo el contenido de la pantalla"
+#define PROCESSOR_TEMP_DESC "processor-temp --> Imprime la temperatura del procesador." 
+#define PROCESSOR_INFO_DESC "processor-info --> Imprime informacion sobre el procesador."
+#define CLEAR_DESC "clear --> Borra todo el contenido de la pantalla."
+#define MEM_DESC "mem --> Imprime el estado de la memoria."
+#define PS_DESC "Imprime la lista de todos los procesos con sus propiedades: nombre, ID, prioridad, stack y base pointer."
+#define LOOP_DESC "Imprime su ID con un saludo cada una determinada cantidad de segundos."
+#define KILL_DESC "Mata un proceso dado su ID."
+#define NICE_DESC "Cambia la prioridad de un proceso dado su ID y la nueva prioridad."
+#define BLOCK_DESC "Cambia el estado de un proceso entre bloqueado y listo dado su ID."
 
-#define COMMANDS_QTY 8
+#define COMMANDS_QTY 14
 #define COMMAND_MAX_LENGTH 50
 #define DESCRIPTION_MAX_LENGTH 300
-#define ARGUMENTS_ACCEPTED 1
+#define MAX_ARGUMENTS_ACCEPTED 2    //CAMBIADO DE 1 A 2
 #define ARG_MAX_LENGTH 30
 
 static int indexOf(char* str);
-static int filterCommand(char buffer[COMMAND_MAX_LENGTH], char com_args[ARGUMENTS_ACCEPTED+1][COMMAND_MAX_LENGTH]);
+static int filterCommand(char buffer[COMMAND_MAX_LENGTH], char com_args[MAX_ARGUMENTS_ACCEPTED+1][COMMAND_MAX_LENGTH]);
 
 //Help function
 static void helpUser();
@@ -66,17 +73,17 @@ static int hexCharToInt(char c);
 extern void writeMem();   //funcion asm utilizada para verificar que printmem funciona correctamente
 
 
-static char commands [COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear"};
-static char commands_description [COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC};
+static char commands [COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block"};
+static char commands_description [COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC, MEM_DESC, PS_DESC, LOOP_DESC, KILL_DESC, NICE_DESC, BLOCK_DESC};
 char buffer[COMMAND_MAX_LENGTH] = {0};
 static int i=0, ctrl=0, changedScreen = 0;
     
 void initShell(){
     char c=0;
-    char command_arguments[ARGUMENTS_ACCEPTED+1][COMMAND_MAX_LENGTH] = {{0}};
+    char command_arguments[MAX_ARGUMENTS_ACCEPTED+1][COMMAND_MAX_LENGTH] = {{0}};
     
     if (!changedScreen){
-        printfC(PROMPT_MSG,0,255,247);
+        printfC(PROMPT_MSG, 0, 255, 247);
     }else{
         changedScreen = 0;
     }
@@ -118,75 +125,111 @@ void initShell(){
     if(i==COMMAND_MAX_LENGTH-1)
         printf(" We are not WSL2 :'( command or argument too long");
     else{
-    buffer[i] = 0;
-    
-    
-    int arg_qty = filterCommand(buffer, command_arguments);
-    int pos = indexOf(command_arguments[0]);
+        buffer[i] = 0;
+        
+        int arg_qty = filterCommand(buffer, command_arguments);
+        int pos = indexOf(command_arguments[0]);
 
-    enter();
+        enter();
 
-    if(pos == -1)
-        printf(COMMAND_NOT_FOUND_MSG);
-    else{
-        int aux;
-        switch(pos){
-            case 0:
-                if(arg_qty!=0)
-                    printf(INVALID_ARGUMENTS_MSG);
-                else
-                    helpUser();
-                break;
-            case 1:
-                if(arg_qty!=1)
-                    printf(INVALID_ARGUMENTS_MSG);
-                else{
-                    i=0; //antes de la excepcion!!!
-                    handle_exception(command_arguments[1][0]);
-                }
-                break;
-            case 2:
-                if(arg_qty!=0)
-                    printf(INVALID_ARGUMENTS_MSG);
-                else
-                    printRegisters();
-                break;
-            case 3:
-                if(arg_qty!=1){
-                    printf(INVALID_ARGUMENTS_MSG); break;
-                }
-                if( (aux = validateDir(command_arguments[1])) == -1)
-                    printf(" No ha ingresado una direccion hexa de 32 bits");
-                else
-                    printMem((void*)aux);
+        if(pos == -1)
+            printf(COMMAND_NOT_FOUND_MSG);
+        else{
+            int aux;
+            switch(pos){
+                case 0: //help
+                    if(arg_qty!=0)
+                        printf(INVALID_ARGUMENTS_MSG);
+                    else
+                        helpUser();
                     break;
-            case 4:
-                if(arg_qty!=0)
-                    printf(INVALID_ARGUMENTS_MSG);
-                else
-                    printSystemTime();
-                break;
-            case 5:
-                if(arg_qty!=0)
-                    printf(INVALID_ARGUMENTS_MSG);
-                else
-                    getCpuTemperature();
-                break;
-            case 6:
-                if(arg_qty!=0)
-                    printf(INVALID_ARGUMENTS_MSG);
-                else
-                    getinfoCPU();
-                break;
-            case 7:
-                if(arg_qty!=0)
-                    printf(INVALID_ARGUMENTS_MSG);
-                else
-                    clearScreen();
-                break;
+                case 1: //exceptions
+                    if(arg_qty!=1)
+                        printf(INVALID_ARGUMENTS_MSG);
+                    else{
+                        i=0; //antes de la excepcion!!!
+                        handle_exception(command_arguments[1][0]);
+                    }
+                    break;
+                case 2: //inforef
+                    if(arg_qty!=0)
+                        printf(INVALID_ARGUMENTS_MSG);
+                    else
+                        printRegisters();
+                    break;
+                case 3: //printmem
+                    if(arg_qty!=1){
+                        printf(INVALID_ARGUMENTS_MSG); break;
+                    }
+                    if( (aux = validateDir(command_arguments[1])) == -1)
+                        printf(" No ha ingresado una direccion hexa de 32 bits");
+                    else
+                        printMem((void*)aux);
+                        break;
+                case 4: //systime
+                    if(arg_qty!=0)
+                        printf(INVALID_ARGUMENTS_MSG);
+                    else
+                        printSystemTime();
+                    break;
+                case 5: //processor-temp
+                    if(arg_qty!=0)
+                        printf(INVALID_ARGUMENTS_MSG);
+                    else
+                        getCpuTemperature();
+                    break;
+                case 6: //processor-info
+                    if(arg_qty!=0)
+                        printf(INVALID_ARGUMENTS_MSG);
+                    else
+                        getinfoCPU();
+                    break;
+                case 7: //clear
+                    if(arg_qty!=0)
+                        printf(INVALID_ARGUMENTS_MSG);
+                    else
+                        clearScreen();
+                    break;
+                case 8: //mem
+                    if(arg_qty!=0)
+                        printf(INVALID_ARGUMENTS_MSG);
+                    else
+                        checkMemoryStatus();
+                    break;
+                case 9: //ps
+                    if(arg_qty!=0)
+                        printf(INVALID_ARGUMENTS_MSG);
+                    else
+                        ps();
+                    break;
+                case 10: //loop
+                    if(arg_qty!=0)
+                        printf(INVALID_ARGUMENTS_MSG);
+                    else
+                        //function - not implemented yet
+                    break;
+                case 11: //kill
+                    if(arg_qty!=1)
+                        printf(INVALID_ARGUMENTS_MSG);
+                    else
+                        //function - not implemented yet
+                    break;
+                case 12: //nice
+                    if(arg_qty!=2)
+                        printf(INVALID_ARGUMENTS_MSG);
+                    else
+                        //function - not implemented yet
+                    break;
+                case 13: //block
+                    if(arg_qty!=1)
+                        printf(INVALID_ARGUMENTS_MSG);
+                    else
+                        //function - not implemented yet
+                    break;
 
+
+            }
         }
-    }
     }
     i = 0;
     enter();
@@ -211,11 +254,11 @@ static int indexOf(char *str){
 en cada una de las siguientes fila deja los argumentos ingresados por el
 usuario y retorna la cantidad de argumentos.
 */
-static int filterCommand(char buffer[COMMAND_MAX_LENGTH], char com_args[ARGUMENTS_ACCEPTED+1][COMMAND_MAX_LENGTH]){
+static int filterCommand(char buffer[COMMAND_MAX_LENGTH], char com_args[MAX_ARGUMENTS_ACCEPTED+1][COMMAND_MAX_LENGTH]){
     int args = 0;   //con args=0 es el comando
     int i = 0, j=0;
     char c;
-    while( ( c = buffer[i] ) != 0 && args < ARGUMENTS_ACCEPTED+1){
+    while( ( c = buffer[i] ) != 0 && args < MAX_ARGUMENTS_ACCEPTED+1){
         if(c == ' '){   //recordar que no se aceptan espacios consecutivos
             args++;
             j=0;
