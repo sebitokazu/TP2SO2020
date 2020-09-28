@@ -64,12 +64,12 @@ process *createProcess(void *entry_point, int argc, char *argv[]) {
     process *new_process = (process *)my_malloc(sizeof(process *));
     void *stack_base = my_malloc(STACK_SIZE);
     new_process->rsp = createStackFrame(stack_base, entry_point, argc, argv);
-    printStackFrame(new_process->rsp);
+    //printStackFrame(new_process->rsp);
     new_process->pid = pids++;
     new_process->state = READY;
     new_process->stack_base = stack_base;
     if (argv != NULL)
-        new_process->name = argv[0];
+        strcpy(new_process->name, argv[0]);
 
     return new_process;
 }

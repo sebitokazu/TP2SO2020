@@ -32,6 +32,8 @@
 #define MAX_ARGUMENTS_ACCEPTED 2  //CAMBIADO DE 1 A 2
 #define ARG_MAX_LENGTH 30
 
+#define MINOR_WAIT 10000000
+
 static int indexOf(char* str);
 static int filterCommand(char buffer[COMMAND_MAX_LENGTH], char com_args[MAX_ARGUMENTS_ACCEPTED + 1][COMMAND_MAX_LENGTH]);
 
@@ -78,6 +80,10 @@ static char decimalCharToHex(char c);
 static int validateDir(char* argument);
 static int hexCharToInt(char c);
 extern void writeMem();  //funcion asm utilizada para verificar que printmem funciona correctamente
+
+//Loop program
+void loop();
+void busy_wait(qword n);
 
 void initShell();
 

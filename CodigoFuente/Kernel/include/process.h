@@ -8,12 +8,14 @@
 //#define WAITING 3
 #define DEAD 4
 
+#define MAX_NAME 50
+
 typedef struct process {
     uint64_t rsp;
     uint64_t stack_base;
     uint64_t pid;
     uint8_t state;
-    char* name;
+    char name[MAX_NAME];
 
 } process;
 

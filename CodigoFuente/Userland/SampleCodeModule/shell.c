@@ -139,11 +139,13 @@ void initShell() {
                         ps();
                     break;
                 case 10:  //loop
-                    if (arg_qty != 0)
+                    if (arg_qty > 1)
                         printf(INVALID_ARGUMENTS_MSG);
-                    else
-                        //function - not implemented yet
-                        break;
+                    else {  //ver lo de fg y bg
+                        char* name[5] = {"loop"};
+                        exec(&loop, 1, name);
+                    }
+                    break;
                 case 11:  //kill
                     if (arg_qty != 1)
                         printf(INVALID_ARGUMENTS_MSG);
@@ -176,6 +178,7 @@ void initShell() {
                         printf("My PID is ");
                         printf(aux);
                     }
+                    break;
             }
         }
     }
@@ -226,6 +229,22 @@ static void helpUser() {
     for (int i = 0; i < COMMANDS_QTY; i++) {
         printf(commands_description[i]);
         enter();
+    }
+}
+
+void busy_wait(qword n) {
+    qword i;
+    for (i = 0; i < n; i++)
+        ;
+}
+
+void loop() {
+    char aux[10];
+    qword pid = getPID();
+    intToStr(pid, aux);
+    while (1) {
+        printf(aux);
+        busy_wait(MINOR_WAIT);
     }
 }
 

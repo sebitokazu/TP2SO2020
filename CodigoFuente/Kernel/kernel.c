@@ -100,6 +100,6 @@ int init() {
     int count = 0;
     while (1) {
         _hlt();
-        if (count++ % 40 == 0) drawWord("Hola");
+        //if (count++ % 40 == 0) drawWord("Hola");
     }
 }
