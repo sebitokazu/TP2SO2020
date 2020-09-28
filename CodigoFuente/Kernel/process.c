@@ -1,14 +1,13 @@
 #include "process.h"
 
-#include "mem_manager.h"
 #include "lib.h"
+#include "mem_manager.h"
 
 #define STACK_SIZE 4096
 
 static uint64_t pids = 0;
 
-typedef struct stack_frame
-{
+typedef struct stack_frame {
     //General use registers
     uint64_t r15;
     uint64_t r14;
@@ -51,21 +50,17 @@ rsi=argv
 Sug: iniciarlos incrementalmente para debugging
 */
 
-
-void printStackFrame(uint64_t *rsp)
-{
+void printStackFrame(uint64_t *rsp) {
     int i;
     char aux[65];
-    for (i = 0; i < 21; i++)
-    {
+    for (i = 0; i < 21; i++) {
         intToStr(rsp[i], aux);
         drawWord(aux);
         jumpLine();
     }
 }
 
-process *createProcess(void *entry_point, int argc, char *argv[])
-{
+process *createProcess(void *entry_point, int argc, char *argv[]) {
     process *new_process = (process *)my_malloc(sizeof(process *));
     void *stack_base = my_malloc(STACK_SIZE);
     new_process->rsp = createStackFrame(stack_base, entry_point, argc, argv);
@@ -79,18 +74,15 @@ process *createProcess(void *entry_point, int argc, char *argv[])
     return new_process;
 }
 
-void killProcess(void *entry_point){
-
+void killProcess(void *entry_point) {
 }
 
-void freeProcess(process *process)
-{
-    my_free(process->rsp); //deberia estar apuntando a stack_base no?
+void freeProcess(process *process) {
+    my_free(process->stack_base);  //deberia estar apuntando a stack_base no?
     my_free(process);
 }
 
-void *createStackFrame(void *stack_base, void *entry_point, int argc, char *argv[])
-{
+void *createStackFrame(void *stack_base, void *entry_point, int argc, char *argv[]) {
     stack_frame *stack_frame = ((char *)stack_base + STACK_SIZE - sizeof(stack_frame));
     stack_frame->r15 = 0;
     stack_frame->r14 = 1;
@@ -100,8 +92,8 @@ void *createStackFrame(void *stack_base, void *entry_point, int argc, char *argv
     stack_frame->r10 = 5;
     stack_frame->r9 = 6;
     stack_frame->r8 = 7;
-    stack_frame->rsi = argv; //argv
-    stack_frame->rdi = argc; //argc
+    stack_frame->rsi = argv;  //argv
+    stack_frame->rdi = argc;  //argc
     stack_frame->rbp = 10;
     stack_frame->rdx = 11;
     stack_frame->rcx = 12;
@@ -111,7 +103,7 @@ void *createStackFrame(void *stack_base, void *entry_point, int argc, char *argv
     stack_frame->rip = entry_point;
     stack_frame->cs = 0x8;
     stack_frame->eflags = 0x202;
-    stack_frame->rsp = (char *)stack_base + STACK_SIZE - 1; //?????
+    stack_frame->rsp = (char *)stack_base + STACK_SIZE - 1;  //?????
     stack_frame->ss = 0x0;
     stack_frame->base = stack_base;
     return ((char *)stack_base + STACK_SIZE - sizeof(stack_frame));
