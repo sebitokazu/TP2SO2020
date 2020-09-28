@@ -74,6 +74,10 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
             break;
         case 18:
             checkMemoryStatus();
+            break;
+        case 19:
+            return getreadyListPID();
+            break;
         default:
             break;
     }

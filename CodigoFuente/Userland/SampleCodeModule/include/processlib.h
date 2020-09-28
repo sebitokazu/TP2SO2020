@@ -5,4 +5,5 @@ void checkMemoryStatus();
 void ps();
 void exec(void* entry_point, int argc, char* argv[]);
 void kill(qword pid);
+qword getPID();
 #endif

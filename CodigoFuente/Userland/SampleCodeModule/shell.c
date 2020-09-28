@@ -15,13 +15,14 @@
 #define PROCESSOR_INFO_DESC "processor-info --> Imprime informacion sobre el procesador."
 #define CLEAR_DESC "clear --> Borra todo el contenido de la pantalla."
 #define MEM_DESC "mem --> Imprime el estado de la memoria."
-#define PS_DESC "Imprime la lista de todos los procesos con sus propiedades: nombre, ID, prioridad, stack y base pointer."
-#define LOOP_DESC "Imprime su ID con un saludo cada una determinada cantidad de segundos."
-#define KILL_DESC "Mata un proceso dado su ID."
-#define NICE_DESC "Cambia la prioridad de un proceso dado su ID y la nueva prioridad."
-#define BLOCK_DESC "Cambia el estado de un proceso entre bloqueado y listo dado su ID."
+#define PS_DESC "ps --> Imprime la lista de todos los procesos con sus propiedades: nombre, ID, prioridad, stack y base pointer."
+#define LOOP_DESC "loop --> Imprime su ID con un saludo cada una determinada cantidad de segundos."
+#define KILL_DESC "kill --> Mata un proceso dado su ID."
+#define NICE_DESC "nice --> Cambia la prioridad de un proceso dado su ID y la nueva prioridad."
+#define BLOCK_DESC "block --> Cambia el estado de un proceso entre bloqueado y listo dado su ID."
+#define MYPID_DESC "mypid --> Imprime el PID de la shell"
 
-#define COMMANDS_QTY 14
+#define COMMANDS_QTY 15
 #define COMMAND_MAX_LENGTH 50
 #define DESCRIPTION_MAX_LENGTH 300
 #define MAX_ARGUMENTS_ACCEPTED 2  //CAMBIADO DE 1 A 2
@@ -74,8 +75,8 @@ static int validateDir(char* argument);
 static int hexCharToInt(char c);
 extern void writeMem();  //funcion asm utilizada para verificar que printmem funciona correctamente
 
-static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block"};
-static char commands_description[COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC, MEM_DESC, PS_DESC, LOOP_DESC, KILL_DESC, NICE_DESC, BLOCK_DESC};
+static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block", "mypid"};
+static char commands_description[COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC, MEM_DESC, PS_DESC, LOOP_DESC, KILL_DESC, NICE_DESC, BLOCK_DESC, MYPID_DESC};
 char buffer[COMMAND_MAX_LENGTH] = {0};
 static int i = 0, ctrl = 0, changedScreen = 0;
 
@@ -235,6 +236,16 @@ void initShell() {
                     else
                         //function - not implemented yet
                         break;
+                case 14:
+                    if (arg_qty != 0)
+                        printf(INVALID_ARGUMENTS_MSG);
+                    else {
+                        char aux[10];
+                        qword pid = getPID();
+                        intToStr(pid, aux);
+                        printf("My PID is ");
+                        printf(aux);
+                    }
             }
         }
     }
