@@ -11,8 +11,6 @@ typedef struct vbe_mode_info_structure *modeInfoP;
 
 int writePixel(int x, int y, int size);
 
-void splitScreen();
-
 void drawChar(char c);
 
 char* getPosScreen();
@@ -37,7 +35,7 @@ void twinkle();
 
 void removeTwinkle();
 
-void saveChar(int screen, int row, int col, char c, int r, int g, int b);
+void saveChar(int row, int col, char c, int r, int g, int b);
 
 int validateWriteCoordenates(int x,int y);
 

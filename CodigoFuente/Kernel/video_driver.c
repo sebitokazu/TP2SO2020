@@ -45,7 +45,7 @@ modeInfo* screen_info = (modeInfo *)0x5C00;
 
 
 //Pointers to screens
-static int x1,x2,y1,y2, currentX, currentY;
+static int currentX, currentY;
 static int currentScreen = 0; //0 if upper screen, 1 down screen
 static int drawingChar=0;
 static int twinkleOn = 0;
@@ -54,11 +54,12 @@ static int twinkleOn = 0;
 static struct colouredChar firstScreen[41][113] = {};
 static struct colouredChar secondScreen[41][113] = {};
 
+static struct colouredChar mappedScreen[82][113] = {};
+
 
 void initializeVideoMode(){
-    splitScreen();
-    x1=0; y1=0;
-    x2=0; y2=HEIGHT/2+1;
+    currentX=0;
+    currentY=0;
 }
 
 /*Returns pointer to framebuffer pointer to where to draw*/
@@ -66,27 +67,6 @@ char * getPixelDataByPosition(int x, int y){
     return (char*)(screen_info->framebuffer + (x+y*WIDTH) * 3);
 }
 
-/*Iterates between two windows*/
-void changeActiveScreen(){
-    while(twinkleOn){
-        drawChar(0);
-        deleteChar();
-    }
-    if(currentScreen == 0){
-        x1 = currentX;
-        y1 = currentY;
-        currentScreen = 1;
-        currentX = x2;
-        currentY = y2;
-    }
-    else{
-        x2 = currentX;
-        y2 = currentY;
-        currentScreen = 0;
-        currentX = x1;
-        currentY = y1;
-    }
-}
 
 /*Jump*/
 void jumpLine(){
@@ -94,7 +74,7 @@ void jumpLine(){
         drawChar(0);
         deleteChar();
     }
-    if(currentY/9 == 40 || currentY/9 == 82) scrollScreen();
+    if(currentY/9 == 82) scrollScreen(); //Aca
     else{
         currentY += 9;
         currentX = 0;
@@ -104,7 +84,7 @@ void jumpLine(){
 /*Remove last character drawn*/
 void deleteChar(){
     if(currentX == 0){
-        if(currentY==0 || currentY==HEIGHT/2+1) return;
+        if(currentY==0) return;
         currentY-=9;
         currentX=1017;
     }
@@ -114,7 +94,7 @@ void deleteChar(){
             deletePixel((currentX)+row, (currentY)+col);
         }
     }
-    saveChar(currentScreen, currentY/9, currentX/9, 0, 0, 0, 0);
+    saveChar(currentY/9, currentX/9, 0, 0, 0, 0);
 }
 
 /*Twinckle when waiting to write*/
@@ -161,7 +141,7 @@ void drawChar(char c){
     drawingChar=1;
     int row, col;
     removeTwinkle();
-    saveChar(currentScreen, currentY/9, currentX/9, c, 255, 255, 255);
+    saveChar(currentY/9, currentX/9, c, 255, 255, 255);
     for(col=0; col<8; col++){
         for(row=0; row<8; row++){
             if(font8x8_basic[c][col] & 1 << row){
@@ -184,7 +164,7 @@ void drawColouredChar(char c, int r, int g, int b){
     drawingChar=1;
     int row, col;
     removeTwinkle();
-    saveChar(currentScreen, currentY/9, currentX/9, c, r, g, b);
+    saveChar(currentY/9, currentX/9, c, r, g, b);
     for(col=0; col<8; col++){
         for(row=0; row<8; row++){
             if(font8x8_basic[c][col] & 1 << row){
@@ -205,73 +185,41 @@ void drawColouredChar(char c, int r, int g, int b){
 void scrollScreen(){
     int i,j;
     struct colouredChar *c;
-    if(!currentScreen){
     //delete all screen information
     for(i=0; i<WIDTH; i++)
-        for(j=0; j<HEIGHT/2-1; j++)
+        for(j=0; j<HEIGHT-1; j++)
             deletePixel(i,j);
     //Rewrite chars starting from second row
     currentX=0; currentY=0;
-    for(i=1; i<41; i++)
+    for(i=1; i<83; i++)
         for(j=0; j<113; j++){
-            c = &(firstScreen[i][j]);
+            c = &(mappedScreen[i][j]);
             drawColouredChar(c->c, c->r, c->g, c->b);
         }
     //Delete chars from last row
     for(i=0;i<113;i++){
-        c = &(firstScreen[40][i]);
+        c = &(mappedScreen[80][i]);
         c->c = 0; c->r=0; c->g=0; c->b=0;
-    }
-        
-    }
-    else{
-        //Same cycle for second screen
-        for(i=0; i<WIDTH; i++)
-            for(j=HEIGHT/2+1; j<HEIGHT; j++)
-                deletePixel(i,j);
-        currentX=0; currentY=HEIGHT/2+1;
-        for(i=1; i<41; i++)
-            for(j=0; j<113; j++){
-                c = &(secondScreen[i][j]);
-                drawColouredChar(c->c, c->r, c->g, c->b);
-            }
-        for(i=0;i<113;i++){
-            c = &(secondScreen[40][i]);
-            c->c = 0; c->r=0; c->g=0; c->b=0;
-        }
     }
 }
 
 void clearScreen(){
     int i,j;
     struct colouredChar *c;
-    if(!currentScreen){
-        for(i=0; i<WIDTH; i++)
-            for(j=0; j<HEIGHT/2-1; j++)
-                deletePixel(i,j);
-        for(i=0;i<41;i++)
+    for(i=0; i<WIDTH; i++)
+        for(j=0; j<HEIGHT-1; j++)
+             deletePixel(i,j);
+        for(i=0;i<82;i++)
             for(j=0;j<113;j++){
-                c = &(firstScreen[i][j]);
+                c = &(mappedScreen[i][j]);
                 c->c = 0; c->r=0; c->g=0; c->b=0;
             }
-        currentY=0;
-    }
-    else{
-        for(i=0; i<WIDTH; i++)
-            for(j=HEIGHT/2+1; j<HEIGHT; j++)
-                deletePixel(i,j);
-        for(i=0;i<41;i++)
-        for(j=0;j<113;j++){
-            c = &(secondScreen[i][j]);
-            c->c = 0; c->r=0; c->g=0; c->b=0;
-        }
-        currentY=HEIGHT/2+1;
-        }
+    currentY=0;
     currentX=0;
 }
 
 int validateWriteCoordenates(int x,int y){
-    if(y/9 == 40 || y/9 == 82){
+    if( y/9 == 82){
         if(x/9 == 112)
             return 1;
     }
@@ -302,20 +250,11 @@ void deletePixel(int x, int y){
     pos[2]=0;
 }
 
-/*Splits screen in two*/
-void splitScreen(){
-    for(int j=0; j<WIDTH; j++)
-        printColouredPixel(j,HEIGHT/2,0,244,0);
-}
 
 /*Save char in char matrix*/
-void saveChar(int screen, int row, int col, char c, int r, int g, int b){
+void saveChar(int row, int col, char c, int r, int g, int b){
     struct colouredChar *toSave;
-    if(screen)
-        toSave = &(secondScreen[row-42][col]);
-    else
-        toSave = &(firstScreen[row][col]);
-    
+    toSave = &(mappedScreen[row][col]);
     toSave->c = c;  toSave->r = r;  toSave->g = g;  toSave->b = b;
     return;
 }

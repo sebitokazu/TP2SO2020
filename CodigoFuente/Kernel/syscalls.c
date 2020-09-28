@@ -30,8 +30,8 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
             syscallDrawChars((char *)rsi);
             break;
         case 4:
-            changeActiveScreen();
-            switchApp();
+            //changeActiveScreen();
+            //switchApp();
             break;
         case 5:  //enter()
             jumpLine();
