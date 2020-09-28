@@ -20,3 +20,7 @@ void kill(qword pid) {
 qword getPID() {
     return syscall(19, 0, 0, 0, 0, 0);
 }
+
+void block(qword pid) {
+    syscall(20, pid, 0, 0, 0, 0);
+}

@@ -26,7 +26,21 @@ uint64_t schedule(uint64_t rsp) {
 
 //aca iria el algoritmo tipo Round Robin etc.
 PCB* next() {
-    return readyList->next;
+    PCB* aux = readyList->next;
+    while (aux->process->state != READY) {
+        aux = aux->next;
+    }
+    return aux;
+}
+
+void blockProcess(uint64_t pid) {
+    int i;
+    PCB* aux = readyList;
+    for (i = 0; i < cant_process && aux->process->pid != pid; i++)
+        aux = aux->next;
+
+    if (aux->process->pid == pid)
+        aux->process->state = (aux->process->state + 1) % 2;
 }
 
 //solicita la creacion de un proceso, es a quien llama la syscall fork
@@ -53,7 +67,7 @@ void removeProcess(uint64_t pid) {
     PCB* previousPCB = readyList;
     PCB* readyListPCB = readyList->next;
     int i;
-    for (int i = 0; i < cant_process && readyListPCB->process->pid != pid; i++) {
+    for (i = 0; i < cant_process && readyListPCB->process->pid != pid; i++) {
         previousPCB = readyListPCB;
         readyListPCB = readyListPCB->next;
     }

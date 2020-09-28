@@ -78,6 +78,9 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
         case 19:
             return getreadyListPID();
             break;
+        case 20:
+            blockProcess(rsi);
+            break;
         default:
             break;
     }

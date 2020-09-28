@@ -1,5 +1,6 @@
 #ifndef SCHEDULER_H_
 #include <stdint.h>
+
 #include "process.h"
 
 #define NULL ((void*)0)
@@ -16,5 +17,6 @@ void initProcess(void* entry_point, int argc, char* argv[]);
 void removeProcess(uint64_t pid);
 process* getCurrentProcess();
 uint64_t getCurrentPID();
+void blockProcess(uint64_t pid);
 
 #endif

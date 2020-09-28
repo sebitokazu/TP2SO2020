@@ -3,9 +3,9 @@
 #include <stdint.h>
 
 #define READY 0
-#define RUNNING 1
-#define BLOCKED 2
-#define WAITING 3
+#define BLOCKED 1
+#define RUNNING 2
+//#define WAITING 3
 #define DEAD 4
 
 typedef struct process {
@@ -13,7 +13,7 @@ typedef struct process {
     uint64_t stack_base;
     uint64_t pid;
     uint8_t state;
-    char *name;
+    char* name;
 
 } process;
 
