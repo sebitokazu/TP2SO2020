@@ -26,7 +26,7 @@
 #define BLOCK_DESC "block --> Cambia el estado de un proceso entre bloqueado y listo dado su ID."
 #define MYPID_DESC "mypid --> Imprime el PID de la shell."
 #define TESTMM_DESC "testmm --> Inicia el programa de testeo del memory manager."
-#define TESTSCH_DESC "testsch --> Inicia el programa de testeo del scheduler"
+#define TESTSCH_DESC "testpro --> Inicia el programa de testeo del scheduler"
 
 #define COMMANDS_QTY 17
 #define COMMAND_MAX_LENGTH 50

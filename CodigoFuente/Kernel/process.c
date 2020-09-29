@@ -63,6 +63,10 @@ void printStackFrame(uint64_t *rsp) {
 process *createProcess(void *entry_point, int argc, char *argv[]) {
     process *new_process = (process *)my_malloc(sizeof(process *));
     void *stack_base = my_malloc(STACK_SIZE);
+
+    if (new_process == NULL || stack_base == NULL)
+        return NULL;
+
     new_process->rsp = createStackFrame(stack_base, entry_point, argc, argv);
     //printStackFrame(new_process->rsp);
     new_process->pid = pids++;
@@ -72,9 +76,6 @@ process *createProcess(void *entry_point, int argc, char *argv[]) {
         strcpy(new_process->name, argv[0]);
 
     return new_process;
-}
-
-void killProcess(void *entry_point) {
 }
 
 void freeProcess(process *process) {

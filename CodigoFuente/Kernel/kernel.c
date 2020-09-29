@@ -86,11 +86,11 @@ int main() {
     load_idt();
     setUp_syscalls();
     void** pargs = (void**)my_malloc(sizeof(char**));
-    pargs[0] = "shell";
-    initProcess(sampleCodeModuleAddress, 1, pargs);
     pargs[0] = "init";
     initProcess(&init, 1, pargs);
-    ((EntryPoint)sampleCodeModuleAddress)();
+    pargs[0] = "shell";
+    initProcess(sampleCodeModuleAddress, 1, pargs);
+    ((EntryPoint)init)();
 
     drawWord("No");
     return 0;

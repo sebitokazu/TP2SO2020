@@ -5,204 +5,206 @@
 #include "test_mm.h"
 #include "test_processes.h"
 
-static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block", "mypid", "testmm", "testschedule"};
+static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block", "mypid", "testmm", "testpro"};
 static char commands_description[COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC, MEM_DESC, PS_DESC, LOOP_DESC, KILL_DESC, NICE_DESC, BLOCK_DESC, MYPID_DESC, TESTMM_DESC, TESTSCH_DESC};
 char buffer[COMMAND_MAX_LENGTH] = {0};
 static int i = 0, ctrl = 0, changedScreen = 0;
 
 void initShell() {
-    char c = 0;
-    char command_arguments[MAX_ARGUMENTS_ACCEPTED + 1][COMMAND_MAX_LENGTH] = {{0}};
+    while (1) {
+        char c = 0;
+        char command_arguments[MAX_ARGUMENTS_ACCEPTED + 1][COMMAND_MAX_LENGTH] = {{0}};
 
-    if (!changedScreen) {
-        printfC(PROMPT_MSG, 0, 255, 247);
-    } else {
-        changedScreen = 0;
-    }
-
-    while ((c = getChar()) != '\n' && (i < COMMAND_MAX_LENGTH - 1)) {
-        switch (c) {
-            case 0:
-                break;
-            case -1:
-                ctrl = 0;
-                break;
-            case 1:
-                ctrl = 1;
-                break;
-            case ' ':  //no permite mas de un espacio
-                if (i > 0 && buffer[i - 1] != ' ') {
-                    buffer[i++] = ' ';
-                    putChar(c);
-                }
-                break;
-            case '\b':
-                if (i != 0) {
-                    backspace();
-                    buffer[--i] = 0;
-                }
-                break;
-            case '\t':
-                break;
-            default:
-                if (ctrl) {
-                    if (c == 's') {
-                        changedScreen = 1;
-                        changeScreen();
-                        return;
-                    }
-                    if (c == 'r')
-                        saveRegisters();
-                } else {
-                    putChar(c);
-                    buffer[i++] = c;
-                }
+        if (!changedScreen) {
+            printfC(PROMPT_MSG, 0, 255, 247);
+        } else {
+            changedScreen = 0;
         }
-    }
-    if (i == COMMAND_MAX_LENGTH - 1)
-        printf(" We are not WSL2 :'( command or argument too long");
-    else {
-        buffer[i] = 0;
 
-        int arg_qty = filterCommand(buffer, command_arguments);
-        int pos = indexOf(command_arguments[0]);
-
-        enter();
-
-        if (pos == -1)
-            printf(COMMAND_NOT_FOUND_MSG);
-        else {
-            int aux;
-            switch (pos) {
-                case 0:  //help
-                    if (arg_qty != 0)
-                        printf(INVALID_ARGUMENTS_MSG);
-                    else
-                        helpUser();
+        while ((c = getChar()) != '\n' && (i < COMMAND_MAX_LENGTH - 1)) {
+            switch (c) {
+                case 0:
                     break;
-                case 1:  //exceptions
-                    if (arg_qty != 1)
-                        printf(INVALID_ARGUMENTS_MSG);
-                    else {
-                        i = 0;  //antes de la excepcion!!!
-                        handle_exception(command_arguments[1][0]);
+                case -1:
+                    ctrl = 0;
+                    break;
+                case 1:
+                    ctrl = 1;
+                    break;
+                case ' ':  //no permite mas de un espacio
+                    if (i > 0 && buffer[i - 1] != ' ') {
+                        buffer[i++] = ' ';
+                        putChar(c);
                     }
                     break;
-                case 2:  //inforef
-                    if (arg_qty != 0)
-                        printf(INVALID_ARGUMENTS_MSG);
-                    else
-                        printRegisters();
-                    break;
-                case 3:  //printmem
-                    if (arg_qty != 1) {
-                        printf(INVALID_ARGUMENTS_MSG);
-                        break;
-                    }
-                    if ((aux = validateDir(command_arguments[1])) == -1)
-                        printf(" No ha ingresado una direccion hexa de 32 bits");
-                    else
-                        printMem((void*)aux);
-                    break;
-                case 4:  //systime
-                    if (arg_qty != 0)
-                        printf(INVALID_ARGUMENTS_MSG);
-                    else
-                        printSystemTime();
-                    break;
-                case 5:  //processor-temp
-                    if (arg_qty != 0)
-                        printf(INVALID_ARGUMENTS_MSG);
-                    else
-                        getCpuTemperature();
-                    break;
-                case 6:  //processor-info
-                    if (arg_qty != 0)
-                        printf(INVALID_ARGUMENTS_MSG);
-                    else
-                        getinfoCPU();
-                    break;
-                case 7:  //clear
-                    if (arg_qty != 0)
-                        printf(INVALID_ARGUMENTS_MSG);
-                    else
-                        clearScreen();
-                    break;
-                case 8:  //mem
-                    if (arg_qty != 0)
-                        printf(INVALID_ARGUMENTS_MSG);
-                    else
-                        checkMemoryStatus();
-                    break;
-                case 9:  //ps
-                    if (arg_qty != 0)
-                        printf(INVALID_ARGUMENTS_MSG);
-                    else
-                        ps();
-                    break;
-                case 10:  //loop
-                    if (arg_qty > 1)
-                        printf(INVALID_ARGUMENTS_MSG);
-                    else {  //ver lo de fg y bg
-                        char* name[5] = {"loop"};
-                        exec(&loop, 1, name);
+                case '\b':
+                    if (i != 0) {
+                        backspace();
+                        buffer[--i] = 0;
                     }
                     break;
-                case 11:  //kill
-                    if (arg_qty != 1)
-                        printf(INVALID_ARGUMENTS_MSG);
-                    else {
-                        int pid = (int)stringToDouble(command_arguments[1]);
-                        kill(pid);
-                    }
+                case '\t':
                     break;
-                case 12:  //nice
-                    if (arg_qty != 2)
-                        printf(INVALID_ARGUMENTS_MSG);
-                    else
-                        //function - not implemented yet
-                        break;
-                case 13:  //block
-                    if (arg_qty != 1)
-                        printf(INVALID_ARGUMENTS_MSG);
-                    else {
-                        int pid = (int)stringToDouble(command_arguments[1]);
-                        block(pid);
-                    }
-                    break;
-                case 14:    //mypid
-                    if (arg_qty != 0)
-                        printf(INVALID_ARGUMENTS_MSG);
-                    else {
-                        char aux[10];
-                        qword pid = getPID();
-                        intToStr(pid, aux);
-                        printf("My PID is ");
-                        printf(aux);
-                    }
-                    break;
-                case 15:
-                    if (arg_qty != 0)
-                        printf(INVALID_ARGUMENTS_MSG);
-                    else{
-                        char *name[] = {"test_mm"};
-                        exec(&test_mm, 1, name);
-                    }
-                    break;
-                case 16:
-                    if(arg_qty != 0)
-                        printf(INVALID_ARGUMENTS_MSG);
-                    else{
-                        char *name[] = {"test_mm"};
-                        exec(&test_processes, 1 , name);
+                default:
+                    if (ctrl) {
+                        if (c == 's') {
+                            changedScreen = 1;
+                            changeScreen();
+                            return;
+                        }
+                        if (c == 'r')
+                            saveRegisters();
+                    } else {
+                        putChar(c);
+                        buffer[i++] = c;
                     }
             }
         }
+        if (i == COMMAND_MAX_LENGTH - 1)
+            printf(" We are not WSL2 :'( command or argument too long");
+        else {
+            buffer[i] = 0;
+
+            int arg_qty = filterCommand(buffer, command_arguments);
+            int pos = indexOf(command_arguments[0]);
+
+            enter();
+
+            if (pos == -1)
+                printf(COMMAND_NOT_FOUND_MSG);
+            else {
+                int aux;
+                switch (pos) {
+                    case 0:  //help
+                        if (arg_qty != 0)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else
+                            helpUser();
+                        break;
+                    case 1:  //exceptions
+                        if (arg_qty != 1)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else {
+                            i = 0;  //antes de la excepcion!!!
+                            handle_exception(command_arguments[1][0]);
+                        }
+                        break;
+                    case 2:  //inforef
+                        if (arg_qty != 0)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else
+                            printRegisters();
+                        break;
+                    case 3:  //printmem
+                        if (arg_qty != 1) {
+                            printf(INVALID_ARGUMENTS_MSG);
+                            break;
+                        }
+                        if ((aux = validateDir(command_arguments[1])) == -1)
+                            printf(" No ha ingresado una direccion hexa de 32 bits");
+                        else
+                            printMem((void*)aux);
+                        break;
+                    case 4:  //systime
+                        if (arg_qty != 0)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else
+                            printSystemTime();
+                        break;
+                    case 5:  //processor-temp
+                        if (arg_qty != 0)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else
+                            getCpuTemperature();
+                        break;
+                    case 6:  //processor-info
+                        if (arg_qty != 0)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else
+                            getinfoCPU();
+                        break;
+                    case 7:  //clear
+                        if (arg_qty != 0)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else
+                            clearScreen();
+                        break;
+                    case 8:  //mem
+                        if (arg_qty != 0)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else
+                            checkMemoryStatus();
+                        break;
+                    case 9:  //ps
+                        if (arg_qty != 0)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else
+                            ps();
+                        break;
+                    case 10:  //loop
+                        if (arg_qty > 1)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else {  //ver lo de fg y bg
+                            char* name[5] = {"loop"};
+                            exec(&loop, 1, name);
+                        }
+                        break;
+                    case 11:  //kill
+                        if (arg_qty != 1)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else {
+                            int pid = (int)stringToDouble(command_arguments[1]);
+                            kill(pid);
+                        }
+                        break;
+                    case 12:  //nice
+                        if (arg_qty != 2)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else
+                            //function - not implemented yet
+                            break;
+                    case 13:  //block
+                        if (arg_qty != 1)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else {
+                            int pid = (int)stringToDouble(command_arguments[1]);
+                            block(pid);
+                        }
+                        break;
+                    case 14:  //mypid
+                        if (arg_qty != 0)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else {
+                            char aux[10];
+                            qword pid = getPID();
+                            intToStr(pid, aux);
+                            printf("My PID is ");
+                            printf(aux);
+                        }
+                        break;
+                    case 15:  //testmm
+                        if (arg_qty != 0)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else {
+                            char* name[] = {"test_mm"};
+                            exec(&test_mm, 1, name);
+                        }
+                        break;
+                    case 16:  //testpro
+                        if (arg_qty != 0)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else {
+                            char* name[] = {"test_processes"};
+                            exec(&test_processes, 1, name);
+                        }
+                }
+            }
+        }
+        i = 0;
+        enter();
     }
-    i = 0;
-    enter();
-    initShell();  //Podriamos hacer un while(1) que abarque todo el codigo
-                  //de initShell() para evitar la recursion infinita de funciones
+    //initShell();  //Podriamos hacer un while(1) que abarque todo el codigo
+    //de initShell() para evitar la recursion infinita de funciones
 }
 
 /* inedxOf: Busca un string en un vector de strings.

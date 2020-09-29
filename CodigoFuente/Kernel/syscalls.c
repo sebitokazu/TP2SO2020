@@ -52,14 +52,12 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
             drawColouredWord((char *)rsi, (int)rdx, (int)rcx, (int)r8);
             break;
         case 11:
-            initProcess((void *)rsi, (int)rdx, (char **)rcx);
-            break;
+            return initProcess((void *)rsi, (int)rdx, (char **)rcx);
         case 12:
             //exit();
             break;
         case 13:
             return my_malloc((size_t)rsi);
-            break;
         case 14:
             my_free((void *)rsi);
             break;
@@ -67,8 +65,7 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
             printProcesses();
             break;
         case 16:
-            removeProcess(rsi);
-            break;
+            return removeProcess(rsi);
         case 17:
             //changePriority(pid,);
             break;
@@ -77,10 +74,8 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
             break;
         case 19:
             return getreadyListPID();
-            break;
         case 20:
-            blockProcess(rsi);
-            break;
+            return blockProcess(rsi);
         default:
             break;
     }
