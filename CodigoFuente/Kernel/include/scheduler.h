@@ -13,10 +13,10 @@ typedef struct PCB {
 
 uint64_t schedule(uint64_t rsp);
 struct PCB* next();
-void initProcess(void* entry_point, int argc, char* argv[]);
-void removeProcess(uint64_t pid);
+int initProcess(void* entry_point, int argc, char* argv[]);
+int removeProcess(uint64_t pid);
 process* getCurrentProcess();
 uint64_t getCurrentPID();
-void blockProcess(uint64_t pid);
+int blockProcess(uint64_t pid);
 
 #endif

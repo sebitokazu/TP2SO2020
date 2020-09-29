@@ -218,6 +218,7 @@ _irq80Handler:
 	call syscall_handler
 	
 	popStateNoRax
+
 	iretq
 
 ;Zero Division Exception

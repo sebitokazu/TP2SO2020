@@ -2,9 +2,11 @@
 
 #include "processlib.h"
 #include "stdlib.h"
+#include "test_mm.h"
+#include "test_processes.h"
 
-static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block", "mypid"};
-static char commands_description[COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC, MEM_DESC, PS_DESC, LOOP_DESC, KILL_DESC, NICE_DESC, BLOCK_DESC, MYPID_DESC};
+static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block", "mypid", "testmm", "testschedule"};
+static char commands_description[COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC, MEM_DESC, PS_DESC, LOOP_DESC, KILL_DESC, NICE_DESC, BLOCK_DESC, MYPID_DESC, TESTMM_DESC, TESTSCH_DESC};
 char buffer[COMMAND_MAX_LENGTH] = {0};
 static int i = 0, ctrl = 0, changedScreen = 0;
 
@@ -168,7 +170,7 @@ void initShell() {
                         block(pid);
                     }
                     break;
-                case 14:
+                case 14:    //mypid
                     if (arg_qty != 0)
                         printf(INVALID_ARGUMENTS_MSG);
                     else {
@@ -179,6 +181,21 @@ void initShell() {
                         printf(aux);
                     }
                     break;
+                case 15:
+                    if (arg_qty != 0)
+                        printf(INVALID_ARGUMENTS_MSG);
+                    else{
+                        char *name[] = {"test_mm"};
+                        exec(&test_mm, 1, name);
+                    }
+                    break;
+                case 16:
+                    if(arg_qty != 0)
+                        printf(INVALID_ARGUMENTS_MSG);
+                    else{
+                        char *name[] = {"test_mm"};
+                        exec(&test_processes, 1 , name);
+                    }
             }
         }
     }

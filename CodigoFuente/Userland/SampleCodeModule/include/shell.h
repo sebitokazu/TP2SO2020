@@ -24,9 +24,11 @@
 #define KILL_DESC "kill --> Mata un proceso dado su ID."
 #define NICE_DESC "nice --> Cambia la prioridad de un proceso dado su ID y la nueva prioridad."
 #define BLOCK_DESC "block --> Cambia el estado de un proceso entre bloqueado y listo dado su ID."
-#define MYPID_DESC "mypid --> Imprime el PID de la shell"
+#define MYPID_DESC "mypid --> Imprime el PID de la shell."
+#define TESTMM_DESC "testmm --> Inicia el programa de testeo del memory manager."
+#define TESTSCH_DESC "testsch --> Inicia el programa de testeo del scheduler"
 
-#define COMMANDS_QTY 15
+#define COMMANDS_QTY 17
 #define COMMAND_MAX_LENGTH 50
 #define DESCRIPTION_MAX_LENGTH 300
 #define MAX_ARGUMENTS_ACCEPTED 2  //CAMBIADO DE 1 A 2

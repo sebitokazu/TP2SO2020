@@ -33,20 +33,29 @@ PCB* next() {
     return aux;
 }
 
-void blockProcess(uint64_t pid) {
+int blockProcess(uint64_t pid) {   //cambia el estado de ready a block y viceversa
     int i;
     PCB* aux = readyList;
     for (i = 0; i < cant_process && aux->process->pid != pid; i++)
         aux = aux->next;
 
-    if (aux->process->pid == pid)
+    if (aux->process->pid == pid){
         aux->process->state = (aux->process->state + 1) % 2;
+        return 0;
+    }
+
+    return -1;
 }
 
 //solicita la creacion de un proceso, es a quien llama la syscall fork
-void initProcess(void* entry_point, int argc, char* argv[]) {
+int initProcess(void* entry_point, int argc, char* argv[]) {
     process* new_process = createProcess(entry_point, argc, argv);
+    
+    if(new_process == NULL)
+        return -1;
+
     addToProcessList(new_process);
+    return 0;
 }
 
 void addToProcessList(process* process) {
@@ -63,20 +72,25 @@ void addToProcessList(process* process) {
     }
 }
 
-void removeProcess(uint64_t pid) {
+int removeProcess(uint64_t pid) {
     PCB* previousPCB = readyList;
     PCB* readyListPCB = readyList->next;
     int i;
+
     for (i = 0; i < cant_process && readyListPCB->process->pid != pid; i++) {
         previousPCB = readyListPCB;
         readyListPCB = readyListPCB->next;
     }
+
     if (readyListPCB->process->pid == pid) {
         previousPCB->next = readyListPCB->next;
         freeProcess(readyListPCB->process);
         my_free(readyListPCB);
         cant_process--;
+        return 0;
     }
+
+    return -1;
 }
 
 process* getreadyListProcess() {
