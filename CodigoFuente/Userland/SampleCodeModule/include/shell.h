@@ -26,9 +26,10 @@
 #define BLOCK_DESC "block --> Cambia el estado de un proceso entre bloqueado y listo dado su ID."
 #define MYPID_DESC "mypid --> Imprime el PID de la shell."
 #define TESTMM_DESC "testmm --> Inicia el programa de testeo del memory manager."
-#define TESTSCH_DESC "testpro --> Inicia el programa de testeo del scheduler"
+#define TESTSCH_DESC "testpro --> Inicia el programa de testeo del scheduler."
+#define YIELD_DESC "yield --> Ejecuta una funcion para testear la renuncia al cpu."
 
-#define COMMANDS_QTY 17
+#define COMMANDS_QTY 18
 #define COMMAND_MAX_LENGTH 50
 #define DESCRIPTION_MAX_LENGTH 300
 #define MAX_ARGUMENTS_ACCEPTED 2  //CAMBIADO DE 1 A 2
@@ -86,6 +87,8 @@ extern void writeMem();  //funcion asm utilizada para verificar que printmem fun
 //Loop program
 void loop();
 void busy_wait(qword n);
+
+void yieldTest();
 
 void initShell();
 

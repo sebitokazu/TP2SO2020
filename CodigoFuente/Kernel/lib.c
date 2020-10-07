@@ -94,3 +94,25 @@ char *strcpy(char *destination, const char *source) {
     // destination is returned by standard strcpy()
     return ptr;
 }
+
+int my_strlen(const char *s) {
+    int i;
+    for (i = 0; s[i] != '\0'; i++)
+        ;
+    return i;
+}
+
+int strcmp(const char *X, const char *Y) {
+    while (*X) {
+        // if characters differ or end of second string is reached
+        if (*X != *Y)
+            break;
+
+        // move to next pair of characters
+        X++;
+        Y++;
+    }
+
+    // return the ASCII difference after converting char* to unsigned char*
+    return *(const unsigned char *)X - *(const unsigned char *)Y;
+}

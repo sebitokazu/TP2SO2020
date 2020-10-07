@@ -5,7 +5,10 @@
 
 #define STACK_SIZE 4096
 
+extern uint64_t getCurrentPID();
 static uint64_t pids = 0;
+
+extern void forceTimerTick();
 
 typedef struct stack_frame {
     //General use registers
@@ -72,10 +75,25 @@ process *createProcess(void *entry_point, int argc, char *argv[]) {
     new_process->pid = pids++;
     new_process->state = READY;
     new_process->stack_base = stack_base;
-    if (argv != NULL)
+
+    if (strcmp(argv[0], "init") != 0 && (strcmp(argv[0], "shell") != 0))
+        new_process->parent_pid = getCurrentPID();
+    else
+        new_process->parent_pid = NULL;
+    if (argv != NULL) {
+        if (isBackgroundProcess(argv[0]))
+            new_process->background = BACKGROUND;
+        else
+            new_process->background = FOREGROUND;
         strcpy(new_process->name, argv[0]);
+    }
 
     return new_process;
+}
+
+int isBackgroundProcess(char *name) {
+    int length = my_strlen(name);
+    return name[length - 1] == '&';
 }
 
 void freeProcess(process *process) {
@@ -108,4 +126,8 @@ void *createStackFrame(void *stack_base, void *entry_point, int argc, char *argv
     stack_frame->ss = 0x0;
     stack_frame->base = stack_base;
     return ((char *)stack_base + STACK_SIZE - sizeof(stack_frame));
+}
+
+void yield() {
+    forceTimerTick();
 }

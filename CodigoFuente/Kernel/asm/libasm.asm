@@ -1,6 +1,7 @@
 GLOBAL cpuVendor
 GLOBAL getKeyboardScancode
 GLOBAL checkIfFindCharacter
+GLOBAL forceTimerTick
 
 
 section .text
@@ -54,5 +55,8 @@ checkIfFindCharacter:
     pop rbp
     ret
     
+forceTimerTick:
+    int 20h
 
+    ret
 

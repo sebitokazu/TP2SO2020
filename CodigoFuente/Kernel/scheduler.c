@@ -5,14 +5,26 @@
 #include "time.h"
 #include "video_driver.h"
 
+extern void forceTimerTick();
+
 static PCB* readyList = NULL;
 
-unsigned int cant_process = 0;
-uint64_t readyListTimeCount = 0, previousTimeCount = 0;
+unsigned int cant_process = 0, current_cant_tt = 0;
+//uint64_t readyListTimeCount = 0, previousTimeCount = 0;
 
 uint64_t schedule(uint64_t rsp) {
     if (readyList == NULL) return rsp;
-    cpuUsedTime();
+
+    if (current_cant_tt++ < readyList->priority)
+        return rsp;
+
+    current_cant_tt = 0;
+
+    if (getCurrentPID() != 0 && ++(readyList->cpuUsedTime) % 90 == 0) {
+        readyList->priority++;
+        readyList->cpuUsedTime = 0;
+    }
+
     readyList->process->rsp = rsp;
 
     if (readyList->process->state == RUNNING)
@@ -36,11 +48,14 @@ PCB* next() {
 int blockProcess(uint64_t pid) {  //cambia el estado de ready a block y viceversa
     int i;
     PCB* aux = readyList;
+
     for (i = 0; i < cant_process && aux->process->pid != pid; i++)
         aux = aux->next;
 
     if (aux->process->pid == pid) {
         aux->process->state = (aux->process->state + 1) % 2;
+        if (getCurrentPID() == pid)
+            forceTT();
         return 0;
     }
     //Deberia ejecutar el tt? Por si un proceso se bloquea a si mismo.
@@ -61,6 +76,7 @@ int initProcess(void* entry_point, int argc, char* argv[]) {
 
 void addToProcessList(process* process) {
     PCB* pcb = (PCB*)my_malloc(sizeof(PCB*));
+    pcb->priority = 0;
 
     if (pcb != NULL) {
         pcb->process = process;
@@ -72,8 +88,30 @@ void addToProcessList(process* process) {
         } else {
             pcb->next = readyList->next;
             readyList->next = pcb;
+            if (pcb->process->background == FOREGROUND && process->pid != 1) {
+                readyList->process->state = BLOCKED;
+                forceTT();
+            }
         }
     }
+}
+
+void my_exit() {
+    PCB* aux = readyList;
+    int parent_pid = aux->process->parent_pid;
+
+    if (parent_pid != NULL) {
+        int i;
+        aux = aux->next;
+        for (i = 0; i < cant_process && aux->process->pid != parent_pid; i++)
+            aux = aux->next;
+        if (i != cant_process) {
+            aux->process->state = READY;
+        }
+    }
+    readyList->process->state = DEAD;
+    //agregar a una lista de procesos a liberar
+    forceTT();
 }
 
 int removeProcess(uint64_t pid) {
@@ -90,6 +128,7 @@ int removeProcess(uint64_t pid) {
         previousPCB->next = readyListPCB->next;
         freeProcess(readyListPCB->process);
         my_free(readyListPCB);
+
         cant_process--;
         return 0;
     }
@@ -103,15 +142,26 @@ process* getreadyListProcess() {
     return readyList->process;
 }
 
-uint64_t getreadyListPID() {
+uint64_t getCurrentPID() {
     return readyList->process->pid;
 }
 
-void cpuUsedTime() {
+/*void cpuUsedTime() {
     readyListTimeCount = seconds_elapsed();
     uint64_t elapsed = previousTimeCount - readyListTimeCount;
     previousTimeCount = readyListTimeCount;
     readyList->cpuUsedTime += elapsed;
+}*/
+
+PCB* getPcbByPID(qword pid) {
+    PCB* aux = readyList;
+    int i;
+    for (i = 0; i < cant_process && aux->process->pid != pid; i++)
+        aux = aux->next;
+    if (i == cant_process)
+        return NULL;
+    else
+        return aux;
 }
 
 void startScheduler() {
@@ -135,7 +185,27 @@ void printProcesses() {
         drawWord(" - Base:");
         intToStr(current->process->stack_base, pidBuff);
         drawWord(pidBuff);
+        drawWord(" - Priority:");
+        intToStr(current->priority, pidBuff);
+        drawWord(pidBuff);
         jumpLine();
         current = current->next;
+    }
+}
+
+void forceTT() {
+    current_cant_tt = readyList->priority;
+    forceTimerTick();
+}
+
+int changePriority(qword pid, int priority) {
+    if (priority < 0 || priority > 5)
+        return -1;
+    PCB* aux = getPcbByPID(pid);
+    if (aux == NULL)
+        return -1;
+    else {
+        aux->priority = priority;
+        aux->cpuUsedTime = 0;
     }
 }

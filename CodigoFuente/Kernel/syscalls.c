@@ -54,7 +54,7 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
         case 11:
             return initProcess((void *)rsi, (int)rdx, (char **)rcx);
         case 12:
-            //exit();
+            my_exit();
             break;
         case 13:
             return my_malloc((size_t)rsi);
@@ -67,15 +67,18 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
         case 16:
             return removeProcess(rsi);
         case 17:
-            //changePriority(pid,);
+            return changePriority(rsi, rdx);
             break;
         case 18:
             checkMemoryStatus();
             break;
         case 19:
-            return getreadyListPID();
+            return getCurrentPID();
         case 20:
             return blockProcess(rsi);
+        case 21:
+            yield();
+            break;
         default:
             break;
     }

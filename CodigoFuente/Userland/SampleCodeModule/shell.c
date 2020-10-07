@@ -5,7 +5,7 @@
 #include "test_mm.h"
 #include "test_processes.h"
 
-static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block", "mypid", "testmm", "testpro"};
+static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block", "mypid", "testmm", "testpro", "yield"};
 static char commands_description[COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC, MEM_DESC, PS_DESC, LOOP_DESC, KILL_DESC, NICE_DESC, BLOCK_DESC, MYPID_DESC, TESTMM_DESC, TESTSCH_DESC};
 char buffer[COMMAND_MAX_LENGTH] = {0};
 static int i = 0, ctrl = 0, changedScreen = 0;
@@ -145,7 +145,12 @@ void initShell() {
                         if (arg_qty > 1)
                             printf(INVALID_ARGUMENTS_MSG);
                         else {  //ver lo de fg y bg
-                            char* name[5] = {"loop"};
+                            char* name[7];
+                            if (command_arguments[1][0] == '&')
+                                *name = "loop &";
+                            else
+                                *name = "loop";
+
                             exec(&loop, 1, name);
                         }
                         break;
@@ -160,9 +165,14 @@ void initShell() {
                     case 12:  //nice
                         if (arg_qty != 2)
                             printf(INVALID_ARGUMENTS_MSG);
-                        else
-                            //function - not implemented yet
-                            break;
+                        else {
+                            int pid = (int)stringToDouble(command_arguments[1]);
+                            int priority = (int)stringToDouble(command_arguments[2]);
+                            int n = nice(pid, priority);
+                            if (n == -1)
+                                printf("La prioridad debe estar entre 0 y 5, o no existe un proceso con el pid ingresado.");
+                        }
+                        break;
                     case 13:  //block
                         if (arg_qty != 1)
                             printf(INVALID_ARGUMENTS_MSG);
@@ -197,6 +207,15 @@ void initShell() {
                             char* name[] = {"test_processes"};
                             exec(&test_processes, 1, name);
                         }
+                        break;
+                    case 17:
+                        if (arg_qty != 0)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else {
+                            char* name[] = {"yieldTest"};
+                            exec(&yieldTest, 1, name);
+                        }
+                        break;
                 }
             }
         }
@@ -261,14 +280,29 @@ void loop() {
     char aux[10];
     qword pid = getPID();
     intToStr(pid, aux);
+    int i = 0;
     while (1) {
         printf(aux);
         busy_wait(MINOR_WAIT);
     }
+
+    my_exit();
+}
+//CORRER EN BG PROCESOS LOOP PORQUE SINO NO TE ENTERAS
+void yieldTest() {
+    int i;
+    for (i = 0; i < 10; i++)
+        printf("Antes de yield");
+    yield();
+    for (i = 0; i < 10; i++)
+        printf("Despues de yield");
+
+    my_exit();
 }
 
 /*Inicio funciones cpu info*/
-static void getinfoCPU() {
+static void
+getinfoCPU() {
     printf(getCpuId1());  //en cpuid.asm
     enter();
     printf(getCpuId2());  //en cpuid.asm

@@ -24,3 +24,15 @@ qword getPID() {
 void block(qword pid) {
     syscall(20, pid, 0, 0, 0, 0);
 }
+
+void my_exit() {
+    syscall(12, 0, 0, 0, 0, 0);
+}
+
+void yield() {
+    syscall(21, 0, 0, 0, 0, 0);
+}
+
+void nice(qword pid, qword priority) {
+    syscall(17, pid, priority, 0, 0, 0);
+}
