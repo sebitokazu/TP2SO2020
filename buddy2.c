@@ -36,8 +36,9 @@ typedef struct node{
 
 static node mem[]; //Initialized in main function.
 static node root = {FREE, NULL, NULL, NULL, MEM_FIRST_ADDRESS, MEM_SIZE_EXP, 0}; //O LO DECLARAMOS COMO *node
-static void *block_arrays_ptrs[MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1]; //Initialized in main function.
-static int block_arrays_sizes[MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1] = {0};
+void *block_arrays_ptrs[MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1]; //Initialized in main function.
+int block_arrays_sizes[MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1] = {0};
+
 
 unsigned long nodes_qty(){
   unsigned long suma = 0;
@@ -47,6 +48,7 @@ unsigned long nodes_qty(){
 
   return suma;
 }
+
 
 unsigned int exp_of_block_needed(unsigned int request){
   unsigned int exp = MEM_SIZE_EXP; //-1 ?
@@ -87,6 +89,7 @@ void split_node(node *n){ //REVISAR ESTA FUNCION (PUNTEROS, DIRECCIONES, ETC) !!
   n->state = SPLIT;
 }
 
+
 unsigned int get_idx_of_next_available_node(int array_idx){
   //Tener en cuenta que cuando se llama a esta funcion, ya se sabe que el array no esta vacio
   unsigned int ans = 0;
@@ -96,6 +99,7 @@ unsigned int get_idx_of_next_available_node(int array_idx){
   
   return ans;
 }
+
 
 //mem {0: 2^0, 1: 2^1, 2: 2^2} 2^5 -> 2^0+2^1+2^2+2^3+2^4 hasta 2^0+2^1+2^2+2^3+2^4+2^5-1
 
@@ -114,17 +118,62 @@ void *buddy_malloc(unsigned int size_request){
   if(block_arrays_sizes[idx] == 0)
     return NULL;  //idx=0 ==> todas las listas estaban vacias
   
-  while(idx > MEM_SIZE_EXP - exp_request){
+  while(idx < MEM_SIZE_EXP - exp_request){
     unsigned int i = get_idx_of_next_available_node(idx);
     split_node( (node*) (block_arrays_ptrs[idx] + i) );
-    idx--;
+    block_arrays_sizes[idx]--;
+    idx++;
+    block_arrays_sizes[idx]+=2;
   }
 
   unsigned int i = get_idx_of_next_available_node(idx);
   ( (node*) (block_arrays_ptrs[idx] + i) )->state = OCCUPIED;
+
   return ( (node*) (block_arrays_ptrs[idx] + i) )->ptr;
 
 }
+
+
+void buddy_free(void *ptr){
+  node *n;
+  int i,j, found = 0, stop = 0, k, aux;
+
+  for(i=0; i < MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1 && !found; i++){
+    
+    if(block_arrays_sizes[i] > 0){ //no recorrer el array innecesariamente  
+      
+      for(j=0; j < pow(2, i) && !found; j++){
+       
+        n = (node *) block_arrays_ptrs[i] + j;
+        if( n != NULL && n->ptr == ptr ){
+          found = 1;
+          n->state = FREE;
+          block_arrays_sizes[i]++;
+        }
+
+      }
+    }
+  }
+
+  /* Checks if its brother is free and joins blocks (once joined its parent does the same). */
+  if(found){
+    while(i>0 && stop){
+      k = j + (j%2 == 0 ? 1 : -1);  //k = brother_index
+      if( ( (node *) block_arrays_ptrs[i] + k )->state == FREE){
+        block_arrays_ptrs[i] + k = NULL;
+        block_arrays_ptrs[i] + j = NULL;
+        block_arrays_sizes[i]-=2;
+        aux = (k%2 == 0 ? 1 : 2); //parent_index = (k-aux)/2
+        block_arrays_ptrs[i-1] + (k-aux)/2 = mem[(k-aux)/2]; 
+        block_arrays_sizes[i-1]++;
+      }
+      else
+        stop = 1;
+    }
+  }
+
+}
+
 
 unsigned int get_idx_of_first_node_in_level(unsigned int level){
   unsigned int idx=0;
