@@ -8,8 +8,11 @@
 extern void forceTimerTick();
 
 static PCB* readyList = NULL;
+static PCB* freeArray[50];
+static int cantToFree = 0;
 
-unsigned int cant_process = 0, current_cant_tt = 0;
+unsigned int cant_process = 0,
+             current_cant_tt = 0;
 //uint64_t readyListTimeCount = 0, previousTimeCount = 0;
 
 uint64_t schedule(uint64_t rsp) {
@@ -32,6 +35,8 @@ uint64_t schedule(uint64_t rsp) {
 
     readyList = next();
     readyList->process->state = RUNNING;
+    //se liberan procesos cuando hay un cambio de contexto
+    freeAll();
 
     return readyList->process->rsp;
 }
@@ -109,7 +114,7 @@ void my_exit() {
             aux->process->state = READY;
         }
     }
-    readyList->process->state = DEAD;
+    removeProcess(getCurrentPID());
     //agregar a una lista de procesos a liberar
     forceTT();
 }
@@ -126,8 +131,10 @@ int removeProcess(uint64_t pid) {
 
     if (readyListPCB->process->pid == pid) {
         previousPCB->next = readyListPCB->next;
-        freeProcess(readyListPCB->process);
-        my_free(readyListPCB);
+        readyListPCB->process->state = DEAD;
+        addToFreeList(readyListPCB);
+        //freeProcess(readyListPCB->process);
+        //my_free(readyListPCB);
 
         cant_process--;
         return 0;
@@ -136,6 +143,19 @@ int removeProcess(uint64_t pid) {
     //Deberia ejecutar el tt? Por si un proceso se suicida
 
     return -1;
+}
+
+void addToFreeList(PCB* pcb) {
+    freeArray[cantToFree++] = pcb;
+}
+
+void freeAll() {
+    int i;
+    for (i = 0; i < cantToFree; i++) {
+        freeProcess(freeArray[i]->process);
+        my_free(freeArray[i]);
+    }
+    cantToFree = 0;
 }
 
 process* getreadyListProcess() {
@@ -174,6 +194,7 @@ void printProcesses() {
     PCB* current = readyList;
     int i;
     char pidBuff[20];
+
     for (i = 0; i < cant_process; i++) {
         drawWord(current->process->name);
         drawWord(" - PID:");
@@ -187,6 +208,9 @@ void printProcesses() {
         drawWord(pidBuff);
         drawWord(" - Priority:");
         intToStr(current->priority, pidBuff);
+        drawWord(pidBuff);
+        drawWord(" - State:");
+        intToStr(current->process->state, pidBuff);
         drawWord(pidBuff);
         jumpLine();
         current = current->next;

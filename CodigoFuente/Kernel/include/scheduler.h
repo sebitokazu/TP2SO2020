@@ -22,5 +22,7 @@ uint64_t getCurrentPID();
 int blockProcess(uint64_t pid);
 void my_exit();
 void forceTT();
+void freeAll();
+void addToFreeList(PCB* pcb);
 
 #endif
