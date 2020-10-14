@@ -3,7 +3,7 @@
 
 #include "process.h"
 
-#define NULL ((void*)0)
+//#define NULL ((void*)0)
 
 typedef struct PCB {
     process* process;

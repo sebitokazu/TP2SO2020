@@ -28,8 +28,9 @@
 #define TESTMM_DESC "testmm --> Inicia el programa de testeo del memory manager."
 #define TESTSCH_DESC "testpro --> Inicia el programa de testeo del scheduler."
 #define YIELD_DESC "yield --> Ejecuta una funcion para testear la renuncia al cpu."
+#define TESTSYNC_DESC "test_sync --> Inicia el programa de testeo de semaforos"
 
-#define COMMANDS_QTY 18
+#define COMMANDS_QTY 19
 #define COMMAND_MAX_LENGTH 50
 #define DESCRIPTION_MAX_LENGTH 300
 #define MAX_ARGUMENTS_ACCEPTED 2  //CAMBIADO DE 1 A 2

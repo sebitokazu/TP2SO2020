@@ -5,7 +5,8 @@
 #include "interrupts.h"
 #include "keyBoardDriver.h"
 #include "mem_manager.h"
-#include "scheduler.h"
+//#include "scheduler.h"
+//#include "semaphores.h"
 #include "video_driver.h"
 
 extern void _hlt();
@@ -78,6 +79,21 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
             return blockProcess(rsi);
         case 21:
             yield();
+            break;
+        case 22:
+            sem_open((const char *)rsi, rdx);
+            break;
+        case 23:
+            sem_close((const char *)rsi);
+            break;
+        case 24:
+            sem_wait((const char *)rsi);
+            break;
+        case 25:
+            sem_post((const char *)rsi);
+            break;
+        case 26:
+            printSemaphoreState();
             break;
         default:
             break;
