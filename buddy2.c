@@ -13,6 +13,9 @@
 
 #define MEM_FIRST_ADDRESS  0x600000 //EN NINGUN MOMENTO NOS ASEGURAMOS DE QUE LA MEM EN ESTAS POSICIONES NO ESTE OCUPADA
 
+
+void printmem2(char *s);
+
 /*
 #define NODES_QTY() {                                           \
   int suma = 0;                                                 \
@@ -119,7 +122,8 @@ void split_node(node *n){ //REVISAR ESTA FUNCION (PUNTEROS, DIRECCIONES, ETC) !!
   n->right->right = mem + (2*idx_aux+2);
   n->right->parent = n;
   n->right->ptr = n->ptr + (1 << (n->exp-1));  //left node begin address + size of (left) block
-  
+  printf("PUNTERO %ld\n", (long)n->right->ptr);
+
   //printf("ptr right %ld\n", (long) n->right->ptr);
 
   //chequear direccion de inicio
@@ -141,6 +145,7 @@ void split_node(node *n){ //REVISAR ESTA FUNCION (PUNTEROS, DIRECCIONES, ETC) !!
   p = (void*)n->right;
 
   n->state = SPLIT;
+  //n->ptr = NULL;
 
 }
 
@@ -173,6 +178,8 @@ void *buddy_malloc(unsigned int size_request){
 
     split_node( (node*) (block_arrays_ptrs[idx] + i*sizeof(node)) );
 
+    printmem2(NULL);
+
     block_arrays_free_spaces[idx]--;
     idx++;
     block_arrays_free_spaces[idx]+=2;
@@ -185,11 +192,16 @@ void *buddy_malloc(unsigned int size_request){
 
   unsigned int i = get_idx_of_next_available_node(idx);
               printf("idx %d - offset %d\n", idx, i);
-  ( (node*) (block_arrays_ptrs[idx] + i*sizeof(node)) )->state = OCCUPIED;
+  node *n = (node*) (block_arrays_ptrs[idx] + i*sizeof(node));
+  n->state = OCCUPIED;
   block_arrays_free_spaces[idx]--;
 
+  printf("LA DIRE %ld\n", n);
+  printf("LA DIRE %ld\n", block_arrays_ptrs[idx] + i*sizeof(node));
 
-  return ( (node*) (block_arrays_ptrs[idx] + i*sizeof(node)) )->ptr;
+  printmem2(NULL);
+
+  return n->ptr;
 
 }
 
@@ -199,14 +211,14 @@ void buddy_free(void *ptr){
   int i,j, found = 0, stop = 0, k, aux;
 
   for(i=0; i < MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1 /*&& !found*/; i++){
-    printf("i = %d - size = %d\n", i, block_arrays_free_spaces[i]);
+    printf("level = %d - size = %d - free spaces = %d\n", i, block_arrays_sizes[i], block_arrays_free_spaces[i]);
     if(block_arrays_sizes[i] > 0){ //no recorrer el array innecesariamente  
       
       for(j=0; j < pow(2, i) /*&& !found*/; j++){
-       
         n = (node *) block_arrays_ptrs[i] + j*sizeof(node);
+
         if( n != NULL && n->ptr == ptr && n->state == OCCUPIED ){
-          printf("%d found!!!!!!!!\n", i);
+          printf("%d %d found!!!!!!!!\n", i, j);
           found = 1;
           n->state = FREE;
           block_arrays_free_spaces[i]++;
@@ -228,6 +240,7 @@ void buddy_free(void *ptr){
         // aux = (k%2 == 0 ? 1 : 2); //parent_index = (k-aux)/2
         // block_arrays_ptrs[i-1] + (k-aux)/2*sizeof(node) = mem[(k-aux)/2]; 
         // block_arrays_free_spaces[i-1]++;
+        // n->ptr = left->ptr;
       }
       else
         stop = 1;
@@ -244,6 +257,49 @@ unsigned int get_idx_of_first_node_in_level(unsigned int level){
     idx += pow(2, j);
 
   return idx;
+}
+
+void printmem(){
+  for(int i=0; i < MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1; i++)
+    printf("level = %d - size = %d - free spaces = %d\n", i, block_arrays_sizes[i], block_arrays_free_spaces[i]);
+}
+
+void printmem2(char *s){
+  node *n;
+  int i, j;
+
+  if( s != NULL)
+    printf("\nDespues de hacer malloc de %s\n", s);
+
+  for(i=0; i < MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1; i++){
+    printf("LEVEL %d\n", i);
+    for(j=0; j<pow(2, i); j++){
+      n = (node *) block_arrays_ptrs[i] + j*sizeof(node);
+      if(n == NULL)
+        printf("-");
+      else{
+        switch (n->state)
+        {
+        case FREE:
+          printf("F");
+          break;
+
+        case OCCUPIED:
+          printf("O");
+          break;
+
+        case SPLIT:
+          printf("S");
+          break;
+
+        default:
+          break;
+        }
+      printf("%ld ", (long)n->ptr);
+      }
+    }
+    printf("\n");
+  }
 }
 
 int main(){
@@ -265,30 +321,47 @@ int main(){
     block_arrays_ptrs[level] = &mem[j]; //mem + (j * sizeof(node))
   }
   block_arrays_free_spaces[0] = 1;
-  block_arrays_sizes[0] = 0;
+  block_arrays_sizes[0] = 1;
 
   /* TESTS */
   for(int size = MEM_SIZE+1000; size >= 512; size/=2){
     //printf("%d (%d) (%d)\n", size, exp_of_block_needed(size), exp_of_block_needed2(size));
   }
-  
+
+ // printmem2(NULL);
+
   void *a = buddy_malloc(4096);
   printf("----------\n");
+
+ // printmem2("a");
+
+  //buddy_free(a);
   void *b = buddy_malloc(4096);
   printf("----------\n");
+  //printmem2("b");
+
   void *c = buddy_malloc(4096);
+  //printmem2("c");
+
   printf("----------\n");
   void *d = buddy_malloc(4096);
+  //printmem2("d");
+
 
   printf("%ld - %ld - %ld - %ld\n", (long)a, (long)b, (long)c, (long)d);
 
-  buddy_free(a);
+  //for(int q=0; q<123; q++)
+   // buddy_malloc(4096);
+
+  buddy_free(b);
   printf("----------\n");
-  a = buddy_malloc(4096);
+  b = buddy_malloc(4096);
   printf("----------\n");
   void *e = buddy_malloc(4096);
 
   printf("%ld - %ld\n", (long)a, (long)e);
+
+  printf("%ld %ld\n", sizeof(node), sizeof(void*));
 
   return 0;
 }
