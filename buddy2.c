@@ -176,7 +176,9 @@ void *buddy_malloc(unsigned int size_request){
   if(block_arrays_free_spaces[idx] == 0)
     return NULL;  //idx=0 ==> todas las listas estaban vacias
   
-  while(idx < MEM_SIZE_EXP - exp_request && block_arrays_sizes[idx+1] < pow(2, idx)){   //pow(2, idx) = number of nodes at idx level
+  while(idx < MEM_SIZE_EXP - exp_request /*&& block_arrays_sizes[idx+1] < pow(2, idx)*/){   //pow(2, idx) = number of nodes at idx level
+    //HAY QUE DESCOMENTAR LA CONDICION Y RESOLVER EL PROBLEMA QUE GENERA. 
+    //TAL VEZ HAYA QUE CHEQUEAR LA CONDICION ANTES DEL SPLIT, DENTRO DEL WHILE
     unsigned int i = get_idx_of_next_available_node(idx);
             printf("idx %d - offset %d\n", idx, i);
 
@@ -211,11 +213,11 @@ void buddy_free(void *ptr){
   node *n;
   int i,j, found = 0, stop = 0, k, aux;
 
-  for(i=0; i < MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1 /*&& !found*/; i++){
+  for(i=0; i < MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1 && !found; i++){
     printf("level = %d - size = %d - free spaces = %d\n", i, block_arrays_sizes[i], block_arrays_free_spaces[i]);
     if(block_arrays_sizes[i] > 0){ //no recorrer el array innecesariamente  
       
-      for(j=0; j < pow(2, i) /*&& !found*/; j++){
+      for(j=0; j < pow(2, i) && !found; j++){
         n = (node *) (block_arrays_ptrs[i] + j*sizeof(node));
 
         if( n != NULL && n->ptr == ptr && n->state == OCCUPIED ){
@@ -352,8 +354,8 @@ int main(){
 
   printf("%ld - %ld - %ld - %ld\n", (long)a, (long)b, (long)c, (long)d);
 
-  //for(int q=0; q<123; q++)
-   // buddy_malloc(4096);
+  for(int q=0; q<2500; q++)
+    buddy_malloc(4096);
 
   buddy_free(b);
   printf("----------\n");
