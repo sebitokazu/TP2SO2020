@@ -11,7 +11,7 @@ typedef struct sem_t {
     char name[MAXNAME];
     int value;
     int lock;
-    Queue* chain;
+    LLQueue* chain;
 } sem_t;
 int sem_open(const char* name, int initial);
 void sem_close(const char* name);

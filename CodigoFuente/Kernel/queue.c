@@ -1,71 +1,61 @@
+/*
+    Linked List Queue Implementation
+    From: https://www.geeksforgeeks.org/queue-linked-list-implementation/
+*/
 #include "queue.h"
 
-/*
-    Implementation from Geeksforgeeks
-    https://www.geeksforgeeks.org/queue-set-1introduction-and-array-implementation/
-*/
-
-// function to create a queue
-// of given capacity.
-// It initializes size of queue as 0
-Queue *createQueue(unsigned int capacity) {
-    struct Queue *queue = (struct Queue *)my_malloc(
-        sizeof(Queue));
-    queue->capacity = capacity;
-
-    // This is important, see the enqueue
-    queue->array = (process **)my_malloc(
-        queue->capacity * sizeof(process *));
-    return queue;
+// A utility function to create a new linked list node.
+QNode* newNode(int k) {
+    QNode* temp = (QNode*)my_malloc(sizeof(QNode));
+    temp->key = k;
+    temp->next = NULL;
+    return temp;
 }
 
-// Queue is full when size becomes
-// equal to the capacity
-int isFull(Queue *queue) {
-    return (queue->size == queue->capacity);
+// A utility function to create an empty queue
+LLQueue* createLLQueue() {
+    LLQueue* q = (LLQueue*)my_malloc(sizeof(LLQueue));
+    q->front = q->rear = NULL;
+    return q;
 }
 
-// Queue is empty when size is 0
-int isEmpty(Queue *queue) {
-    return (queue->size == 0);
+// The function to add a key k to q
+void enqueue(LLQueue* q, int k) {
+    // Create a new LL node
+    QNode* temp = newNode(k);
+
+    // If queue is empty, then new node is front and rear both
+    if (q->rear == NULL) {
+        q->front = q->rear = temp;
+        return;
+    }
+
+    // Add the new node at the end of queue and change rear
+    q->rear->next = temp;
+    q->rear = temp;
 }
 
-// Function to add an item to the queue.
-// It changes rear and size
-void enqueue(Queue *queue, process *item) {
-    if (isFull(queue)) return;
-    queue->array[queue->size] = item;
-    queue->size = queue->size + 1;
+// Function to remove a key from given queue q
+int dequeue(LLQueue* q) {
+    // If queue is empty, return NULL.
+    if (q->front == NULL)
+        return -1;
+
+    // Store previous front and move front one node ahead
+    struct QNode* temp = q->front;
+
+    q->front = q->front->next;
+
+    // If front becomes NULL, then change rear also as NULL
+    if (q->front == NULL)
+        q->rear = NULL;
+
+    int pid = temp->key;
+    my_free(temp);
+
+    return pid;
 }
 
-// Function to remove an item from queue.
-// It changes front and size
-process *dequeue(Queue *queue) {
-    if (isEmpty(queue))
-        return NULL;
-    process *item = queue->array[queue->front];
-    queue->front = (queue->front + 1) % queue->capacity;
-    queue->size = queue->size - 1;
-    return item;
+int isEmpty(LLQueue* q) {
+    return q->front == NULL;
 }
-
-void deleteQueue(Queue *q) {
-    my_free(q->array);
-    my_free(q);
-}
-
-/*// Function to get front of queue
-int front(struct Queue *queue)
-{
-    if (isEmpty(queue))
-        return INT_MIN;
-    return queue->array[queue->front];
-}
-
-// Function to get rear of queue
-int rear(struct Queue *queue)
-{
-    if (isEmpty(queue))
-        return INT_MIN;
-    return queue->array[queue->rear];
-}*/

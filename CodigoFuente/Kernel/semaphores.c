@@ -25,7 +25,7 @@ int sem_open(const char* name, int initial) {
 
     sem->value = initial;
     sem->lock = 0;
-    sem->chain = createQueue(initial);
+    sem->chain = createLLQueue();
 
     strcpy(sem->name, name);
 
@@ -67,7 +67,8 @@ void sem_close(const char* name) {
 
     if (temp != NULL && temp->sem == sem) {
         semaphore_list = temp->next;
-        deleteQueue(sem->chain);
+        //deleteQueue(sem->chain);
+        my_free(sem->chain);
         my_free(sem);
         my_free(temp);
         return;
@@ -80,7 +81,8 @@ void sem_close(const char* name) {
 
     prev->next = temp->next;
 
-    deleteQueue(sem->chain);
+    //deleteQueue(sem->chain);
+    my_free(sem->chain);
     my_free(sem);
     my_free(temp);
     return;
@@ -116,10 +118,10 @@ void release(int* lock) {
     _xchg(lock, 0);
 }
 
-void sleep(Queue* p) {
-    process* current = getreadyListProcess();
+void sleep(LLQueue* p) {
+    int current = getCurrentPID();
     enqueue(p, current);
-    blockProcess(current->pid);
+    blockProcess(current);
 }
 
 void acquire(int* lock) {
@@ -127,20 +129,22 @@ void acquire(int* lock) {
         ;
 }
 
-void wakeup(Queue* p) {
+void wakeup(LLQueue* p) {
     if (!isEmpty(p)) {
-        process* process = dequeue(p);
-        blockProcess(process->pid);
+        int pid = dequeue(p);
+        blockProcess(pid);
     }
 }
 
-void printSemaphoreWaitList(Queue* q) {
+void printSemaphoreWaitList(LLQueue* q) {
     char pidBuff[20];
     int i;
-    for (i = 0; i < q->size; i++) {
-        intToStr(q->array[i]->pid, pidBuff);
+    QNode* node = q->front;
+    while (node != NULL) {
+        intToStr(node->key, pidBuff);
         drawWord(pidBuff);
         drawWord(" - ");
+        node = node->next;
     }
 }
 

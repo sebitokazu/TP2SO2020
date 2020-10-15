@@ -23,7 +23,6 @@ void inc(int argc, char *argv[]) {
     uint64_t sem = stringToInt(argv[1]);
     uint64_t value = stringToInt(argv[2]);
     uint64_t N = stringToInt(argv[3]);
-
     if (sem && !sem_open(SEM_ID, 1)) {
         printf("ERROR OPENING SEM");
         enter();
@@ -34,7 +33,6 @@ void inc(int argc, char *argv[]) {
         slowInc(&global, value);
         if (sem) sem_post(SEM_ID);
     }
-    printf("end");
     if (sem) sem_close(SEM_ID);
 
     char aux[10];
@@ -54,8 +52,8 @@ void test_sync(int argc, char *argv[]) {
     printf("CREATING PROCESSES...(WITH SEM)");
     enter();
 
-    char *argv1[] = {"inc &", "1", "1", "1000"};
-    char *argv2[] = {"inc &", "1", "-1", "1000"};
+    char *argv1[] = {"incA &", "1", "1", "1000"};
+    char *argv2[] = {"incB &", "1", "-1", "1000"};
 
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
         exec(&inc, 4, argv1);

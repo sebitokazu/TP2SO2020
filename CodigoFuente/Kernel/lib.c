@@ -53,14 +53,23 @@ void reverse(char *str, int len) {
         j--;
     }
 }
-
+//Generates a string of an integer
 int intToStr(int x, char str[]) {
     int i = 0;
+    //Check if its negative
+    int neg = 0;
+    if (x < 0) {
+        i++;
+        neg = 1;
+        x *= -1;
+    }
     if (x != 0) {
         while (x) {
             str[i++] = (x % 10) + '0';
             x = x / 10;
         }
+        if (neg)
+            str[i++] = '-';
         reverse(str, i);
         str[i] = '\0';
     } else {
