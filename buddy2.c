@@ -40,7 +40,7 @@ typedef struct node{
 
 
 node mem[24600]; //Initialized in main function (NOT ANY MORE). 24600 = nodes_qty * sizeof(node) 
-static node root = {FREE, mem+1, mem+2, NULL, (void *)MEM_FIRST_ADDRESS, MEM_SIZE_EXP, 0, 0}; //O LO DECLARAMOS COMO *node
+static node root = {FREE, &mem[1], &mem[2], NULL, (void *)MEM_FIRST_ADDRESS, MEM_SIZE_EXP, 0, 0}; //O LO DECLARAMOS COMO *node
 void *block_arrays_ptrs[MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1]; //Initialized in main function.
 int block_arrays_free_spaces[MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1] = {0};  //free nodes in level
 int block_arrays_sizes[MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1] = {0};  //number of initialized nodes (free, split, occupied) in level
@@ -103,8 +103,10 @@ void split_node(node *n){ //REVISAR ESTA FUNCION (PUNTEROS, DIRECCIONES, ETC) !!
   mem[2*i + 2] = *n->right;
   
   n->left->state = FREE;
-  n->left->left = mem + (2*idx_aux+1);
-  n->left->right = mem + (2*idx_aux+2);
+  // n->left->left = mem + (2*idx_aux+1);
+  // n->left->right = mem + (2*idx_aux+2);
+  n->left->left = &mem[2*idx_aux+1];
+  n->left->right = &mem[2*idx_aux+2];
   n->left->parent = n;
   n->left->ptr = n->ptr;  //chequear direccion de inicio
 
@@ -118,8 +120,10 @@ void split_node(node *n){ //REVISAR ESTA FUNCION (PUNTEROS, DIRECCIONES, ETC) !!
 
 
   n->right->state = FREE;
-  n->right->left = mem + (2*idx_aux+1);
-  n->right->right = mem + (2*idx_aux+2);
+  // n->right->left = mem + (2*idx_aux+1);
+  // n->right->right = mem + (2*idx_aux+2);
+  n->right->left = &mem[2*idx_aux+1];
+  n->right->right = &mem[2*idx_aux+2];
   n->right->parent = n;
   n->right->ptr = n->ptr + (1 << (n->exp-1));  //left node begin address + size of (left) block
   printf("PUNTERO %ld\n", (long)n->right->ptr);
@@ -178,7 +182,6 @@ void *buddy_malloc(unsigned int size_request){
 
     split_node( (node*) (block_arrays_ptrs[idx] + i*sizeof(node)) );
 
-    printmem2(NULL);
 
     block_arrays_free_spaces[idx]--;
     idx++;
@@ -199,8 +202,6 @@ void *buddy_malloc(unsigned int size_request){
   printf("LA DIRE %ld\n", n);
   printf("LA DIRE %ld\n", block_arrays_ptrs[idx] + i*sizeof(node));
 
-  printmem2(NULL);
-
   return n->ptr;
 
 }
@@ -215,7 +216,7 @@ void buddy_free(void *ptr){
     if(block_arrays_sizes[i] > 0){ //no recorrer el array innecesariamente  
       
       for(j=0; j < pow(2, i) /*&& !found*/; j++){
-        n = (node *) block_arrays_ptrs[i] + j*sizeof(node);
+        n = (node *) (block_arrays_ptrs[i] + j*sizeof(node));
 
         if( n != NULL && n->ptr == ptr && n->state == OCCUPIED ){
           printf("%d %d found!!!!!!!!\n", i, j);
@@ -232,7 +233,7 @@ void buddy_free(void *ptr){
   if(found){
     while(i>0 && stop){
       k = j + (j%2 == 0 ? 1 : -1);  //k = brother_index
-      if( ( (node *) block_arrays_ptrs[i] + k*sizeof(node) )->state == FREE){
+      if( ( (node *) (block_arrays_ptrs[i] + k*sizeof(node)) )->state == FREE){
         // block_arrays_ptrs[i] + k*sizeof(node) = NULL;
         // block_arrays_ptrs[i] + j*sizeof(node) = NULL;
         // block_arrays_free_spaces[i]-=2;
@@ -274,7 +275,7 @@ void printmem2(char *s){
   for(i=0; i < MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1; i++){
     printf("LEVEL %d\n", i);
     for(j=0; j<pow(2, i); j++){
-      n = (node *) block_arrays_ptrs[i] + j*sizeof(node);
+      n = (node *) (block_arrays_ptrs[i] + j*sizeof(node));
       if(n == NULL)
         printf("-");
       else{
@@ -317,8 +318,9 @@ int main(){
   /* Pointers initialization */
   for(int level=0, j; level < MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1; level++){
     j = get_idx_of_first_node_in_level(level);
-          printf("Level %d - idx %d\n", level, j);
     block_arrays_ptrs[level] = &mem[j]; //mem + (j * sizeof(node))
+              printf("Level %d - idx %d - %ld\n", level, j, (long) block_arrays_ptrs[level]);
+
   }
   block_arrays_free_spaces[0] = 1;
   block_arrays_sizes[0] = 1;
@@ -345,7 +347,7 @@ int main(){
 
   printf("----------\n");
   void *d = buddy_malloc(4096);
-  //printmem2("d");
+  printmem2("d");
 
 
   printf("%ld - %ld - %ld - %ld\n", (long)a, (long)b, (long)c, (long)d);
@@ -355,9 +357,12 @@ int main(){
 
   buddy_free(b);
   printf("----------\n");
+  printmem2("B");
   b = buddy_malloc(4096);
   printf("----------\n");
   void *e = buddy_malloc(4096);
+    printmem2("e");
+
 
   printf("%ld - %ld\n", (long)a, (long)e);
 
