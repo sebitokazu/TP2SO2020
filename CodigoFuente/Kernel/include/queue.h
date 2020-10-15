@@ -13,4 +13,5 @@ int isFull(Queue *queue);
 int isEmpty(Queue *queue);
 void enqueue(Queue *queue, process *item);
 process *dequeue(Queue *queue);
+void deleteQueue(Queue *q);
 #endif

@@ -81,7 +81,7 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
             yield();
             break;
         case 22:
-            sem_open((const char *)rsi, rdx);
+            return sem_open((const char *)rsi, rdx);
             break;
         case 23:
             sem_close((const char *)rsi);

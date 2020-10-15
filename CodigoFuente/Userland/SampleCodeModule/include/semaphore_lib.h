@@ -10,5 +10,4 @@ void sem_post(const char* name);
 void sem_close(const char* name);
 
 void print_sem();
-
 #endif

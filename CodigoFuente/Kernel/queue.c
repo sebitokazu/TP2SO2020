@@ -49,6 +49,11 @@ process *dequeue(Queue *queue) {
     return item;
 }
 
+void deleteQueue(Queue *q) {
+    my_free(q->array);
+    my_free(q);
+}
+
 /*// Function to get front of queue
 int front(struct Queue *queue)
 {
