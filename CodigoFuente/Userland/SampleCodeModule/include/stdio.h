@@ -19,4 +19,6 @@ void putCharC(char c, int r, int g, int b);
 
 void printfC(char *src, int r, int g, int b);
 
+void printfd(int x);
+
 #endif /* stdio_h */

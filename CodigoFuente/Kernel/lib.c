@@ -54,29 +54,43 @@ void reverse(char *str, int len) {
     }
 }
 //Generates a string of an integer
+/*
+    From: https://www.geeksforgeeks.org/implement-itoa/
+*/
 int intToStr(int x, char str[]) {
     int i = 0;
-    //Check if its negative
-    int neg = 0;
-    if (x < 0) {
-        i++;
-        neg = 1;
-        x *= -1;
-    }
-    if (x != 0) {
-        while (x) {
-            str[i++] = (x % 10) + '0';
-            x = x / 10;
-        }
-        if (neg)
-            str[i++] = '-';
-        reverse(str, i);
+    int isNegative = 0;
+
+    /* Handle 0 explicitely, otherwise empty string is printed for 0 */
+    if (x == 0) {
+        str[i++] = '0';
         str[i] = '\0';
-    } else {
-        str[0] = '0';
-        str[1] = '\0';
         return 1;
     }
+
+    // In standard itoa(), negative numbers are handled only with
+    // base 10. Otherwise numbers are considered unsigned.
+    if (x < 0) {
+        isNegative = 1;
+        x = -x;
+    }
+
+    // Process individual digits
+    while (x != 0) {
+        int rem = x % 10;
+        str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
+        x = x / 10;
+    }
+
+    // If number is negative, append '-'
+    if (isNegative)
+        str[i++] = '-';
+
+    str[i] = '\0';  // Append string terminator
+
+    // Reverse the string
+    reverse(str, i);
+
     return i;
 }
 

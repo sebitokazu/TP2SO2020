@@ -13,6 +13,8 @@ void reverse(char* str, int len);
 
 int intToStr(int x, char str[]);
 
+int itoa(int x, char str[]);
+
 void floatToString(float n, char* res, int afterpoint);
 
 int stringToInt(char* str);

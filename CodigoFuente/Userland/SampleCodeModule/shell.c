@@ -186,11 +186,9 @@ void initShell() {
                         if (arg_qty != 0)
                             printf(INVALID_ARGUMENTS_MSG);
                         else {
-                            char aux[10];
                             qword pid = getPID();
-                            intToStr(pid, aux);
                             printf("My PID is ");
-                            printf(aux);
+                            printfd(pid);
                         }
                         break;
                     case 15:  //testmm

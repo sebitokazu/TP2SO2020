@@ -35,10 +35,8 @@ void inc(int argc, char *argv[]) {
     }
     if (sem) sem_close(SEM_ID);
 
-    char aux[10];
-    intToStr(global, aux);
     printf("Final value: ");
-    printf(aux);
+    printfd(global);
     enter();
 
     my_exit();

@@ -67,7 +67,6 @@ void sem_close(const char* name) {
 
     if (temp != NULL && temp->sem == sem) {
         semaphore_list = temp->next;
-        //deleteQueue(sem->chain);
         my_free(sem->chain);
         my_free(sem);
         my_free(temp);
@@ -81,7 +80,6 @@ void sem_close(const char* name) {
 
     prev->next = temp->next;
 
-    //deleteQueue(sem->chain);
     my_free(sem->chain);
     my_free(sem);
     my_free(temp);
