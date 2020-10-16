@@ -14,6 +14,7 @@ static int cantToFree = 0;
 unsigned int cant_process = 0,
              current_cant_tt = 0;
 //uint64_t readyListTimeCount = 0, previousTimeCount = 0;
+uint64_t foregroundPID = 1;
 
 uint64_t schedule(uint64_t rsp) {
     if (readyList == NULL) return rsp;
@@ -58,7 +59,25 @@ int blockProcess(uint64_t pid) {  //cambia el estado de ready a block y vicevers
         aux = aux->next;
 
     if (aux->process->pid == pid) {
-        aux->process->state = (aux->process->state + 1) % 2;
+        aux->process->state = BLOCKED;
+        if (getCurrentPID() == pid)
+            forceTT();
+        return 0;
+    }
+    //Deberia ejecutar el tt? Por si un proceso se bloquea a si mismo.
+
+    return -1;
+}
+
+int unblockProcess(uint64_t pid) {  //cambia el estado de ready a block y viceversa
+    int i;
+    PCB* aux = readyList;
+
+    for (i = 0; i < cant_process && aux->process->pid != pid; i++)
+        aux = aux->next;
+
+    if (aux->process->pid == pid) {
+        aux->process->state = READY;
         if (getCurrentPID() == pid)
             forceTT();
         return 0;
@@ -70,13 +89,28 @@ int blockProcess(uint64_t pid) {  //cambia el estado de ready a block y vicevers
 
 //solicita la creacion de un proceso, es a quien llama la syscall fork
 int initProcess(void* entry_point, int argc, char* argv[]) {
-    process* new_process = createProcess(entry_point, argc, argv);
+    process* new_process = createProcess(entry_point, argc, argv, NONE);
 
     if (new_process == NULL)
         return -1;
 
     addToProcessList(new_process);
     return new_process->pid;
+}
+
+int initPipedProcesses(void* entry_point1, char* argv1[], void* entry_point2, char* argv2[]) {
+    process* new_process1 = createProcess(entry_point1, 1, argv1, STDOUT);
+    process* new_process2 = createProcess(entry_point2, 1, argv2, STDIN);
+
+    if (new_process1 == NULL || new_process2 == NULL)
+        return -1;
+
+    createPipe(SHELLPIPE, new_process1->pid);
+    createPipe(SHELLPIPE, new_process2->pid);
+
+    addToProcessList(new_process1);
+    addToProcessList(new_process2);
+    return 1;
 }
 
 void addToProcessList(process* process) {
@@ -95,6 +129,7 @@ void addToProcessList(process* process) {
             readyList->next = pcb;
             if (pcb->process->background == FOREGROUND && process->pid != 1) {
                 readyList->process->state = BLOCKED;
+                setForegroundPID(pcb->process->pid);
                 forceTT();
             }
         }
@@ -112,6 +147,7 @@ void my_exit() {
             aux = aux->next;
         if (i != cant_process) {
             aux->process->state = READY;
+            setForegroundPID(aux->process->pid);
         }
     }
     removeProcess(getCurrentPID());
@@ -166,6 +202,13 @@ uint64_t getCurrentPID() {
     return readyList->process->pid;
 }
 
+uint64_t getForegroundPID() {
+    return foregroundPID;
+}
+
+void setForegroundPID(uint64_t pid) {
+    foregroundPID = pid;
+}
 /*void cpuUsedTime() {
     readyListTimeCount = seconds_elapsed();
     uint64_t elapsed = previousTimeCount - readyListTimeCount;

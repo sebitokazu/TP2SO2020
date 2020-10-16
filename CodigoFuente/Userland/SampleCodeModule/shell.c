@@ -1,11 +1,12 @@
 #include "shell.h"
 
+#include "pipe_lib.h"
 #include "processlib.h"
 #include "stdlib.h"
 #include "test_mm.h"
 #include "test_processes.h"
 
-static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block", "mypid", "testmm", "testpro", "yield"};
+static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block", "mypid", "testmm", "testpro", "yield", "|", "producer", "consumer", "pipes"};
 static char commands_description[COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC, MEM_DESC, PS_DESC, LOOP_DESC, KILL_DESC, NICE_DESC, BLOCK_DESC, MYPID_DESC, TESTMM_DESC, TESTSCH_DESC};
 char buffer[COMMAND_MAX_LENGTH] = {0};
 static int i = 0, ctrl = 0, changedScreen = 0;
@@ -215,6 +216,40 @@ void initShell() {
                             char* name[] = {"yieldTest"};
                             exec(&yieldTest, 1, name);
                         }
+                        break;
+                    case 18:  //pipe_bar |
+                        if (arg_qty != 2)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else {
+                            //exec(&command_arguments[1])
+                            //exec(command_arguments[2])
+                        }
+                        break;
+                    case 19:
+                        if (arg_qty != 0)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else {
+                            char* name[11];
+                            *name = "producer &";
+                            exec(&producer, 1, name);
+                        }
+                        break;
+                    case 20:
+                        if (arg_qty > 1)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else {
+                            char* name[11];
+                            if (command_arguments[1][0] == '&')
+                                *name = "consumer &";
+                            else
+                                *name = "consumer";
+                            *name = "consumer";
+
+                            exec(&consumer, 1, name);
+                        }
+                        break;
+                    case 21:
+                        printPipes();
                         break;
                 }
             }
@@ -547,3 +582,31 @@ int hexCharToInt(char c) {
     }
 }
 /*Fin funciones printmem*/
+const char* pipe_name = "example";
+/* Inicio funciones producer-consumer*/
+void producer() {
+    int res = createPipe(pipe_name);
+    if (res == -1)
+        my_exit();
+    int i;
+    for (i = 0; i < COMMANDS_QTY; i++) {
+        writePipe(pipe_name, commands[i], COMMAND_MAX_LENGTH);
+    }
+    my_exit();
+}
+
+void consumer() {
+    int res = createPipe(pipe_name);
+    if (res == -1)
+        my_exit();
+    int i, read = 1;
+    char buf[COMMAND_MAX_LENGTH + 1];
+    for (i = 0; i < COMMANDS_QTY; i++) {
+        readPipe(pipe_name, buf, COMMAND_MAX_LENGTH);
+        printf(buf);
+        enter();
+    }
+    my_exit();
+}
+
+/* Fin funciones producer-consumer*/

@@ -28,8 +28,9 @@
 #define TESTMM_DESC "testmm --> Inicia el programa de testeo del memory manager."
 #define TESTSCH_DESC "testpro --> Inicia el programa de testeo del scheduler."
 #define YIELD_DESC "yield --> Ejecuta una funcion para testear la renuncia al cpu."
+#define PIPE_BAR_DESC "| --> Conceta dos procesos mediante un pipe. Ejemplo de uso: | ./p1 ./p2"
 
-#define COMMANDS_QTY 18
+#define COMMANDS_QTY 22
 #define COMMAND_MAX_LENGTH 50
 #define DESCRIPTION_MAX_LENGTH 300
 #define MAX_ARGUMENTS_ACCEPTED 2  //CAMBIADO DE 1 A 2
@@ -83,6 +84,10 @@ static char decimalCharToHex(char c);
 static int validateDir(char* argument);
 static int hexCharToInt(char c);
 extern void writeMem();  //funcion asm utilizada para verificar que printmem funciona correctamente
+
+//Prod-cons
+void producer();
+void consumer();
 
 //Loop program
 void loop();

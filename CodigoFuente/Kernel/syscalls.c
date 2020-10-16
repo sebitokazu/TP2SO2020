@@ -79,6 +79,16 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
         case 21:
             yield();
             break;
+        case 22:
+            return createPipe(rsi, getCurrentPID());
+            break;
+        case 23:
+            return writePipe((const char *)rsi, (char *)rdx, (int)rcx);
+        case 24:
+            return readPipe((const char *)rsi, (char *)rdx, (int)rcx);
+        case 25:
+            printPipes();
+            break;
         default:
             break;
     }

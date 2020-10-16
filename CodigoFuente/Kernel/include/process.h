@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include "pipe.h"
+
 #define READY 0
 #define BLOCKED 1
 #define RUNNING 2
@@ -13,6 +15,10 @@
 
 #define MAX_NAME 50
 
+#define NONE 0
+#define STDIN 1
+#define STDOUT 2
+
 typedef struct process {
     uint64_t rsp;
     uint64_t stack_base;
@@ -20,10 +26,12 @@ typedef struct process {
     uint64_t parent_pid;
     uint8_t state;
     uint8_t background;
+    pipe* stdin;
+    pipe* stdout;
     char name[MAX_NAME];
 } process;
 
-process* createProcess(void* entry_point, int argc, char* argv[]);
+process* createProcess(void* entry_point, int argc, char* argv[], int pipe_role);
 void freeProcess(process* process);
 void yield();
 

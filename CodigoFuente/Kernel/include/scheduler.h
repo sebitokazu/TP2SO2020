@@ -16,10 +16,14 @@ typedef struct PCB {
 uint64_t schedule(uint64_t rsp);
 struct PCB* next();
 int initProcess(void* entry_point, int argc, char* argv[]);
+int initPipedProcesses(void* entry_point1, char* argv1[], void* entry_point2, char* argv2[]);
 int removeProcess(uint64_t pid);
 process* getCurrentProcess();
 uint64_t getCurrentPID();
+uint64_t getForegroundPID();
+void setForegroundPID(uint64_t pid);
 int blockProcess(uint64_t pid);
+int unblockProcess(uint64_t pid);
 void my_exit();
 void forceTT();
 void freeAll();

@@ -63,7 +63,7 @@ void printStackFrame(uint64_t *rsp) {
     }
 }
 
-process *createProcess(void *entry_point, int argc, char *argv[]) {
+process *createProcess(void *entry_point, int argc, char *argv[], int pipe_role) {
     process *new_process = (process *)my_malloc(sizeof(process *));
     void *stack_base = my_malloc(STACK_SIZE);
 
@@ -86,6 +86,23 @@ process *createProcess(void *entry_point, int argc, char *argv[]) {
         else
             new_process->background = FOREGROUND;
         strcpy(new_process->name, argv[0]);
+    }
+    switch (pipe_role) {
+        case NONE:
+            new_process->stdin = NULL;
+            new_process->stdout = NULL;
+            break;
+        case STDIN:
+            new_process->stdin = getPipe(SHELLPIPE);
+            new_process->stdout = NULL;
+            break;
+        case STDOUT:
+            new_process->stdout = getPipe(SHELLPIPE);
+            new_process->stdin = NULL;
+            break;
+        default:
+            return -1;
+            break;
     }
 
     return new_process;
