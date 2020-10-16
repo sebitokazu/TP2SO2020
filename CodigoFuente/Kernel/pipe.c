@@ -32,6 +32,29 @@ int createPipe(const char* name, int pid) {
         return 1;
     }
 }
+pipe* createShellPipe(const char* name, int pid) {
+    pipe* p = getPipe(name);
+    if (p != NULL) {
+        p->pids[1] = pid;
+    } else {
+        p = (pipe*)my_malloc(sizeof(pipe));
+        if (p == NULL) return NULL;
+        p->pipe_id = pipe_ids++;
+        p->pids[0] = pid;
+        p->pids[1] = -1;
+        p->nwrite = 0;
+        p->nread = 0;
+        strcpy(p->name, name);
+
+        pipe_list* node = (pipe_list*)my_malloc(sizeof(pipe_list));
+        if (node == NULL)
+            return NULL;
+        node->pipe = p;
+        node->next = pipes;
+        pipes = node;
+    }
+    return p;
+}
 
 void wakeup(pipe* p) {
     if (getCurrentPID() == p->pids[0])

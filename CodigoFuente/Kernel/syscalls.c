@@ -89,6 +89,9 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
         case 25:
             printPipes();
             break;
+        case 26:
+            return initPipedProcesses((void *)rsi, (char **)rdx, (void *)rcx, (char **)r8);
+            break;
         default:
             break;
     }
@@ -100,28 +103,46 @@ void setUp_syscalls() {
 }
 
 static void syscallReadChar(char *dest) {
-    while (emptyBuffer()) {
-        _hlt();
+    process *current = getCurrentProcess();
+    if (current->stdin_p == NULL) {
+        while (emptyBuffer()) {
+            _hlt();
+        }
+        readChar(dest);
+    } else {
+        readPipe(current->stdin_p->name, dest, 1);
     }
-    readChar(dest);
 }
 
 static void syscallReadChars(char *dest, int size) {
-    int i = 0;
-    char aux[5];
-    while (size > 0) {
-        syscallReadChar(aux);
-        if (aux[0] != 0) {
-            dest[i++] = aux[0];
-            size--;
+    process *current = getCurrentProcess();
+    if (current->stdin_p == NULL) {
+        int i = 0;
+        char aux[5];
+        while (size > 0) {
+            syscallReadChar(aux);
+            if (aux[0] != 0) {
+                dest[i++] = aux[0];
+                size--;
+            }
         }
+    } else {
+        readPipe(current->stdin_p == NULL, dest, size);
     }
 }
 
 static void syscallDrawChar(char c) {
-    drawChar(c);
+    process *current = getCurrentProcess();
+    if (current->stdout_p == NULL)
+        drawChar(c);
+    else
+        writePipe(current->stdout_p->name, &c, 1);
 }
 
 static void syscallDrawChars(char *src) {
-    drawWord(src);
+    process *current = getCurrentProcess();
+    if (current->stdout_p == NULL)
+        drawWord(src);
+    else
+        writePipe(current->stdout_p->name, src, my_strlen(src));
 }

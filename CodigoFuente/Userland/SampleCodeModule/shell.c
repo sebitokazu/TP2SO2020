@@ -6,8 +6,8 @@
 #include "test_mm.h"
 #include "test_processes.h"
 
-static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block", "mypid", "testmm", "testpro", "yield", "|", "producer", "consumer", "pipes"};
-static char commands_description[COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC, MEM_DESC, PS_DESC, LOOP_DESC, KILL_DESC, NICE_DESC, BLOCK_DESC, MYPID_DESC, TESTMM_DESC, TESTSCH_DESC};
+static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block", "mypid", "testmm", "testpro", "yield", "|", "producer", "consumer", "pipes", "cat"};
+static char commands_description[COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC, MEM_DESC, PS_DESC, LOOP_DESC, KILL_DESC, NICE_DESC, BLOCK_DESC, MYPID_DESC, TESTMM_DESC, TESTSCH_DESC, YIELD_DESC, PIPE_BAR_DESC, PRODUCER_DESC, CONSUMER_DESC, PIPES_DESC, CAT_DESC};
 char buffer[COMMAND_MAX_LENGTH] = {0};
 static int i = 0, ctrl = 0, changedScreen = 0;
 
@@ -221,8 +221,11 @@ void initShell() {
                         if (arg_qty != 2)
                             printf(INVALID_ARGUMENTS_MSG);
                         else {
-                            //exec(&command_arguments[1])
-                            //exec(command_arguments[2])
+                            char* name1[20];
+                            *name1 = "loop &";
+                            char* name2[20];
+                            *name2 = "cat";
+                            pipe_exec(&loop, name1, &cat, name2);
                         }
                         break;
                     case 19:
@@ -250,6 +253,15 @@ void initShell() {
                         break;
                     case 21:
                         printPipes();
+                        break;
+                    case 22:
+                        if (arg_qty != 0)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else {
+                            char* name[4];
+                            *name = "cat";
+                            exec(&cat, 1, name);
+                        }
                         break;
                 }
             }
@@ -317,6 +329,7 @@ void loop() {
     intToStr(pid, aux);
     int i = 0;
     while (1) {
+        printf("Soy ");
         printf(aux);
         busy_wait(MINOR_WAIT);
     }
@@ -592,6 +605,7 @@ void producer() {
     for (i = 0; i < COMMANDS_QTY; i++) {
         writePipe(pipe_name, commands[i], COMMAND_MAX_LENGTH);
     }
+    putChar('\n');
     my_exit();
 }
 
@@ -610,3 +624,39 @@ void consumer() {
 }
 
 /* Fin funciones producer-consumer*/
+
+void cat() {
+    char c = 0;
+    char catBuffer[65];
+    unsigned int pos = 0;
+    while ((c = getChar()) != '\n' && (pos < 65 - 1)) {
+        switch (c) {
+            case 0:
+                break;
+            case -1:
+                ctrl = 0;
+                break;
+            case 1:
+                ctrl = 1;
+                break;
+            case ' ':  //no permite mas de un espacio
+                if (i > 0 && catBuffer[pos - 1] != ' ') {
+                    catBuffer[pos++] = ' ';
+                }
+                break;
+            case '\b':
+            case '\t':
+                break;
+            default:
+                if (ctrl) {
+                    if (c == 'r')
+                        saveRegisters();
+                } else {
+                    catBuffer[pos++] = c;
+                }
+        }
+    }
+    printf(catBuffer);
+
+    my_exit();
+}

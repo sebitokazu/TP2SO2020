@@ -3,8 +3,7 @@
 
 #define MAXBUFFERLENGTH 240
 #define MAXNAME 50
-
-#define SHELLPIPE "cmd_"
+static const char* SHELLPIPE = "cmd_";
 static int pipe_ids = 0;
 
 typedef struct pipe {
@@ -17,6 +16,7 @@ typedef struct pipe {
 } pipe;
 
 int createPipe(const char* name, int pid);
+pipe* createShellPipe(const char* name, int pid);
 int readPipe(const char* name, char* buf, int n);
 int writePipe(const char* name, char* str, int n);
 void deletePipe(const char* name);

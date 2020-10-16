@@ -8,4 +8,5 @@ void kill(qword pid);
 void my_exit();
 qword getPID();
 void yield();
+void pipe_exec(void* entry_point1, char* argv1[], void* entry_point2, char* argv2[]);
 #endif

@@ -105,8 +105,8 @@ int initPipedProcesses(void* entry_point1, char* argv1[], void* entry_point2, ch
     if (new_process1 == NULL || new_process2 == NULL)
         return -1;
 
-    createPipe(SHELLPIPE, new_process1->pid);
-    createPipe(SHELLPIPE, new_process2->pid);
+    new_process1->stdout_p = createShellPipe(SHELLPIPE, new_process1->pid);
+    new_process2->stdin_p = createShellPipe(SHELLPIPE, new_process2->pid);
 
     addToProcessList(new_process1);
     addToProcessList(new_process2);
@@ -194,7 +194,7 @@ void freeAll() {
     cantToFree = 0;
 }
 
-process* getreadyListProcess() {
+process* getCurrentProcess() {
     return readyList->process;
 }
 
@@ -228,7 +228,7 @@ PCB* getPcbByPID(qword pid) {
 }
 
 void startScheduler() {
-    ((int (*)(void))(getreadyListProcess()->rsp))();
+    ((int (*)(void))(getCurrentProcess()->rsp))();
 }
 
 void printProcesses() {

@@ -84,7 +84,7 @@ static void saveInBuffer(char c) {
     if (ctrl && c == 'c') {
         uint64_t fgpid = getForegroundPID();
         if (fgpid != 1) {
-            blockProcess(1);
+            unblockProcess(1);
             removeProcess(fgpid);
             setForegroundPID(1);
             return;

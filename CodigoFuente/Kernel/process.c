@@ -89,16 +89,16 @@ process *createProcess(void *entry_point, int argc, char *argv[], int pipe_role)
     }
     switch (pipe_role) {
         case NONE:
-            new_process->stdin = NULL;
-            new_process->stdout = NULL;
+            new_process->stdin_p = NULL;
+            new_process->stdout_p = NULL;
             break;
         case STDIN:
-            new_process->stdin = getPipe(SHELLPIPE);
-            new_process->stdout = NULL;
+            new_process->stdin_p = getPipe(SHELLPIPE);
+            new_process->stdout_p = NULL;
             break;
         case STDOUT:
-            new_process->stdout = getPipe(SHELLPIPE);
-            new_process->stdin = NULL;
+            new_process->stdout_p = getPipe(SHELLPIPE);
+            new_process->stdin_p = NULL;
             break;
         default:
             return -1;

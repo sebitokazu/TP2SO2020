@@ -26,8 +26,8 @@ typedef struct process {
     uint64_t parent_pid;
     uint8_t state;
     uint8_t background;
-    pipe* stdin;
-    pipe* stdout;
+    pipe* stdin_p;
+    pipe* stdout_p;
     char name[MAX_NAME];
 } process;
 

@@ -28,9 +28,13 @@
 #define TESTMM_DESC "testmm --> Inicia el programa de testeo del memory manager."
 #define TESTSCH_DESC "testpro --> Inicia el programa de testeo del scheduler."
 #define YIELD_DESC "yield --> Ejecuta una funcion para testear la renuncia al cpu."
-#define PIPE_BAR_DESC "| --> Conceta dos procesos mediante un pipe. Ejemplo de uso: | ./p1 ./p2"
+#define PIPE_BAR_DESC "| --> Conecta dos procesos mediante un pipe. Ejemplo de uso: | ./p1 ./p2"
+#define PRODUCER_DESC "producer --> Inicia el programa producer"
+#define CONSUMER_DESC "consumer --> Inicia el programa consumer"
+#define PIPES_DESC "pipes --> Imprime el estado de todos los pipes"
+#define CAT_DESC "cat --> Imprime el stdin tal como lo recibe (no acepta backspace)"
 
-#define COMMANDS_QTY 22
+#define COMMANDS_QTY 23
 #define COMMAND_MAX_LENGTH 50
 #define DESCRIPTION_MAX_LENGTH 300
 #define MAX_ARGUMENTS_ACCEPTED 2  //CAMBIADO DE 1 A 2
@@ -88,6 +92,8 @@ extern void writeMem();  //funcion asm utilizada para verificar que printmem fun
 //Prod-cons
 void producer();
 void consumer();
+
+void cat();
 
 //Loop program
 void loop();
