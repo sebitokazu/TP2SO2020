@@ -105,11 +105,13 @@ int initPipedProcesses(void* entry_point1, char* argv1[], void* entry_point2, ch
     if (new_process1 == NULL || new_process2 == NULL)
         return -1;
 
+    new_process1->background = BACKGROUND;
     new_process1->stdout_p = createShellPipe(SHELLPIPE, new_process1->pid);
     new_process2->stdin_p = createShellPipe(SHELLPIPE, new_process2->pid);
 
     addToProcessList(new_process1);
     addToProcessList(new_process2);
+
     return 1;
 }
 
@@ -169,8 +171,8 @@ int removeProcess(uint64_t pid) {
         previousPCB->next = readyListPCB->next;
         readyListPCB->process->state = DEAD;
         addToFreeList(readyListPCB);
-        //freeProcess(readyListPCB->process);
-        //my_free(readyListPCB);
+        if (readyListPCB->process->stdin_p != NULL || readyListPCB->process->stdout_p != NULL)
+            closePipe(SHELLPIPE, pid);
 
         cant_process--;
         return 0;

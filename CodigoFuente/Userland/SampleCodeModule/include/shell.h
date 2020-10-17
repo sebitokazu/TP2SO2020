@@ -10,6 +10,7 @@
 #define PROMPT_MSG "ratti-galende@shell-service: "
 #define COMMAND_NOT_FOUND_MSG "Command not found :("
 #define INVALID_ARGUMENTS_MSG "Invalid arguments!"
+#define NOT_PIPEABLE_MSG "Some of the programs can't be piped"
 #define HELP_DESC "help --> Funcion que despliega la lista de comandos y una breve descripcion de ellos."
 #define EXCEPTIONS_DESC "exceptions --> Si el parametro es 0, ejecuta un programa que produce una excepcion de division por cero. Y si el parametro es 1 ejecuta otro que produce una del tipo invalid opcode. E imprime informacion sobre el error correspondiente."
 #define INFOREG_DESC "inforeg --> Imprime la informacion que habia en los registros al momento de capturarlos. Para poder capturarlos presionar ctrl+r."
@@ -33,8 +34,10 @@
 #define CONSUMER_DESC "consumer --> Inicia el programa consumer"
 #define PIPES_DESC "pipes --> Imprime el estado de todos los pipes"
 #define CAT_DESC "cat --> Imprime el stdin tal como lo recibe (no acepta backspace)"
+#define UNBLOCK_DESC "unblock --> Cambia el estado de un proceso a listo dado su ID."
+#define WC_DESC "wc --> Cuenta la cantidad de líneas del input."
 
-#define COMMANDS_QTY 23
+#define COMMANDS_QTY 25
 #define COMMAND_MAX_LENGTH 50
 #define DESCRIPTION_MAX_LENGTH 300
 #define MAX_ARGUMENTS_ACCEPTED 2  //CAMBIADO DE 1 A 2
@@ -94,6 +97,7 @@ void producer();
 void consumer();
 
 void cat();
+void wc();
 
 //Loop program
 void loop();

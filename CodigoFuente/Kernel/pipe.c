@@ -100,6 +100,17 @@ int readPipe(const char* name, char* buf, int n) {
     return i;
 }
 
+void closePipe(const char* name, int pid) {
+    pipe* p = getPipe(name);
+    if (p->pids[0] == pid) {
+        p->pids[0] = -1;
+    } else {
+        p->pids[1] = -1;
+    }
+    if (p->pids[0] + p->pids[1] == -2)
+        deletePipe(name);
+}
+
 void deletePipe(const char* name) {
     if (pipes == NULL)
         return;

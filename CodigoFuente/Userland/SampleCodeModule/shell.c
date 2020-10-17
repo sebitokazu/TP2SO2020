@@ -6,8 +6,8 @@
 #include "test_mm.h"
 #include "test_processes.h"
 
-static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block", "mypid", "testmm", "testpro", "yield", "|", "producer", "consumer", "pipes", "cat"};
-static char commands_description[COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC, MEM_DESC, PS_DESC, LOOP_DESC, KILL_DESC, NICE_DESC, BLOCK_DESC, MYPID_DESC, TESTMM_DESC, TESTSCH_DESC, YIELD_DESC, PIPE_BAR_DESC, PRODUCER_DESC, CONSUMER_DESC, PIPES_DESC, CAT_DESC};
+static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block", "mypid", "testmm", "testpro", "yield", "|", "producer", "consumer", "pipes", "cat", "unblock", "wc"};
+static char commands_description[COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC, MEM_DESC, PS_DESC, LOOP_DESC, KILL_DESC, NICE_DESC, BLOCK_DESC, MYPID_DESC, TESTMM_DESC, TESTSCH_DESC, YIELD_DESC, PIPE_BAR_DESC, PRODUCER_DESC, CONSUMER_DESC, PIPES_DESC, CAT_DESC, WC_DESC};
 char buffer[COMMAND_MAX_LENGTH] = {0};
 static int i = 0, ctrl = 0, changedScreen = 0;
 
@@ -221,11 +221,42 @@ void initShell() {
                         if (arg_qty != 2)
                             printf(INVALID_ARGUMENTS_MSG);
                         else {
-                            char* name1[20];
-                            *name1 = "loop &";
-                            char* name2[20];
-                            *name2 = "cat";
-                            pipe_exec(&loop, name1, &cat, name2);
+                            void* prog[2];
+                            char** name[2];
+                            int k, index, is_pipeable = 1;
+                            for (k = 1; k < 3; k++) {
+                                index = indexOf(command_arguments[k]);
+                                if (index == -1) {
+                                    is_pipeable = 0;
+                                    break;
+                                } else {
+                                    switch (index) {
+                                        case 10:
+                                            prog[k - 1] = &loop;
+                                            char* _loop[] = {"loop"};
+                                            name[k - 1] = _loop;
+
+                                            break;
+                                        case 22:
+                                            prog[k - 1] = &cat;
+                                            char* _cat[] = {"cat"};
+                                            name[k - 1] = _cat;
+                                            break;
+                                        case 24:
+                                            prog[k - 1] = &wc;
+                                            char* _wc[] = {"wc"};
+                                            name[k - 1] = _wc;
+                                            break;
+                                        default:
+                                            is_pipeable = 0;
+                                            break;
+                                    }
+                                }
+                            }
+                            if (is_pipeable) {
+                                pipe_exec(prog[0], name[0], prog[1], name[1]);
+                            } else
+                                printf(NOT_PIPEABLE_MSG);
                         }
                         break;
                     case 19:
@@ -246,7 +277,6 @@ void initShell() {
                                 *name = "consumer &";
                             else
                                 *name = "consumer";
-                            *name = "consumer";
 
                             exec(&consumer, 1, name);
                         }
@@ -261,6 +291,23 @@ void initShell() {
                             char* name[4];
                             *name = "cat";
                             exec(&cat, 1, name);
+                        }
+                        break;
+                    case 23:
+                        if (arg_qty != 1)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else {
+                            int pid = (int)stringToDouble(command_arguments[1]);
+                            unblock(pid);
+                        }
+                        break;
+                    case 24:
+                        if (arg_qty != 0)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else {
+                            char* name[3];
+                            *name = "wc";
+                            exec(&wc, 1, name);
                         }
                         break;
                 }
@@ -331,6 +378,7 @@ void loop() {
     while (1) {
         printf("Soy ");
         printf(aux);
+        enter();
         busy_wait(MINOR_WAIT);
     }
 
@@ -606,6 +654,7 @@ void producer() {
         writePipe(pipe_name, commands[i], COMMAND_MAX_LENGTH);
     }
     putChar('\n');
+    closePipe(pipe_name);
     my_exit();
 }
 
@@ -620,6 +669,7 @@ void consumer() {
         printf(buf);
         enter();
     }
+    closePipe(pipe_name);
     my_exit();
 }
 
@@ -630,6 +680,7 @@ void cat() {
     char catBuffer[65];
     unsigned int pos = 0;
     while ((c = getChar()) != '\n' && (pos < 65 - 1)) {
+        putChar(c);
         switch (c) {
             case 0:
                 break;
@@ -657,6 +708,27 @@ void cat() {
         }
     }
     printf(catBuffer);
+    my_exit();
+}
 
+void wc() {
+    char c = 0;
+    unsigned int cant = 0;
+    while ((c = getChar()) != '$') {
+        switch (c) {
+            case '\n':
+                cant++;
+                break;
+            default:
+                if (ctrl)
+                    if (c == 'r')
+                        saveRegisters();
+        }
+    }
+    printf("Cantidad de lineas:");
+    char aux[20];
+    intToStr(cant, aux);
+    printf(aux);
+    enter();
     my_exit();
 }

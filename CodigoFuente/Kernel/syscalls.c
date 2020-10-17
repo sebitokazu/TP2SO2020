@@ -14,6 +14,7 @@ static void syscallReadChar(char *dest);
 static void syscallReadChars(char *dest, int size);
 static void syscallDrawChar(char c);
 static void syscallDrawChars(char *src);
+static void syscallJumpline();
 
 long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword r9) {
     switch (rdi) {
@@ -34,7 +35,7 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
             //switchApp();
             break;
         case 5:  //enter()
-            jumpLine();
+            syscallJumpline();
             break;
         case 6:  //backspace()
             deleteChar();
@@ -91,6 +92,10 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
             break;
         case 26:
             return initPipedProcesses((void *)rsi, (char **)rdx, (void *)rcx, (char **)r8);
+        case 27:
+            return unblockProcess(rsi);
+        case 28:
+            closePipe((const char *)rsi, getCurrentPID());
             break;
         default:
             break;
@@ -100,6 +105,16 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
 
 void setUp_syscalls() {
     setup_IDT_entry(0x80, (uint64_t)&_irq80Handler);
+}
+
+static void syscallJumpline() {
+    process *current = getCurrentProcess();
+    if (current->stdout_p == NULL)
+        jumpLine();
+    else {
+        char *c = "\n";
+        writePipe(current->stdin_p->name, c, 1);
+    }
 }
 
 static void syscallReadChar(char *dest) {
@@ -143,6 +158,7 @@ static void syscallDrawChars(char *src) {
     process *current = getCurrentProcess();
     if (current->stdout_p == NULL)
         drawWord(src);
-    else
+    else {
         writePipe(current->stdout_p->name, src, my_strlen(src));
+    }
 }

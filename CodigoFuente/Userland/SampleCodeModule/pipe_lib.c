@@ -17,3 +17,7 @@ int readPipe(const char* name, char* str, int n) {
 void printPipes() {
     syscall(25, 0, 0, 0, 0, 0);
 }
+
+void closePipe(const char* name) {
+    syscall(28, name, 0, 0, 0, 0);
+}

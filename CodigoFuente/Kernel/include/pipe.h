@@ -21,6 +21,7 @@ int readPipe(const char* name, char* buf, int n);
 int writePipe(const char* name, char* str, int n);
 void deletePipe(const char* name);
 pipe* getPipe(const char* name);
+void closePipe(const char* name, int pid);
 
 void printPipes();
 

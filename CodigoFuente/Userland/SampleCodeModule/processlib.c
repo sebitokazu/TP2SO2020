@@ -39,3 +39,7 @@ void nice(qword pid, qword priority) {
 void pipe_exec(void* entry_point1, char* argv1[], void* entry_point2, char* argv2[]) {
     syscall(26, entry_point1, argv1, entry_point2, argv2, 0);
 }
+
+void unblock(qword pid) {
+    syscall(27, pid, 0, 0, 0, 0);
+}
