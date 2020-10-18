@@ -5,6 +5,7 @@
 #include "time.h"
 #include "video_driver.h"
 
+
 extern void forceTimerTick();
 
 static PCB* readyList = NULL;
@@ -232,4 +233,8 @@ int changePriority(qword pid, int priority) {
         aux->priority = priority;
         aux->cpuUsedTime = 0;
     }
+}
+
+void yield() {
+    forceTT();
 }

@@ -110,6 +110,8 @@ void sem_post(const char* name) {
     s->value++;
     wakeup(s->chain);
     release(&(s->lock));
+
+    yield();
 }
 
 void release(int* lock) {

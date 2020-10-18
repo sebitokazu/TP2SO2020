@@ -24,5 +24,6 @@ void my_exit();
 void forceTT();
 void freeAll();
 void addToFreeList(PCB* pcb);
+void yield();
 
 #endif

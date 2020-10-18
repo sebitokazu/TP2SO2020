@@ -13,6 +13,7 @@ typedef struct sem_t {
     int lock;
     LLQueue* chain;
 } sem_t;
+
 int sem_open(const char* name, int initial);
 void sem_close(const char* name);
 void printSemaphoreState();

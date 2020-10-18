@@ -128,6 +128,3 @@ void *createStackFrame(void *stack_base, void *entry_point, int argc, char *argv
     return ((char *)stack_base + STACK_SIZE - sizeof(stack_frame));
 }
 
-void yield() {
-    forceTimerTick();
-}

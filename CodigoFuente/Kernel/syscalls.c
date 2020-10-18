@@ -5,7 +5,7 @@
 #include "interrupts.h"
 #include "keyBoardDriver.h"
 #include "mem_manager.h"
-//#include "scheduler.h"
+#include "scheduler.h"
 //#include "semaphores.h"
 #include "video_driver.h"
 

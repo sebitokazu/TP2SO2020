@@ -1,4 +1,5 @@
 #ifndef _SEMAPHORE_LIB_H
+
 #include "types.h"
 
 int sem_open(const char* name, int size);

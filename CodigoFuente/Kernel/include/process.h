@@ -25,6 +25,5 @@ typedef struct process {
 
 process* createProcess(void* entry_point, int argc, char* argv[]);
 void freeProcess(process* process);
-void yield();
 
 #endif

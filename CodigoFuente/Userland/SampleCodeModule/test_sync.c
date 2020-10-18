@@ -9,6 +9,9 @@
 
 int64_t global;  //shared memory
 
+
+
+
 void slowInc(int64_t *p, int64_t inc) {
     int64_t aux = *p;
     aux += inc;
@@ -19,21 +22,28 @@ void slowInc(int64_t *p, int64_t inc) {
 //int argc, char *argv[]
 //uint64_t sem, uint64_t value, uint64_t N
 void inc(int argc, char *argv[]) {
+
+
     uint64_t i;
     uint64_t sem = stringToInt(argv[1]);
-    uint64_t value = stringToInt(argv[2]);
+    long value = stringToInt(argv[2]);
     uint64_t N = stringToInt(argv[3]);
+
     if (sem && !sem_open(SEM_ID, 1)) {
         printf("ERROR OPENING SEM");
         enter();
         my_exit();
     }
     for (i = 0; i < N; i++) {
-        if (sem) sem_wait(SEM_ID);
+        sem_wait(SEM_ID);
+ 
         slowInc(&global, value);
-        if (sem) sem_post(SEM_ID);
+       
+        sem_post(SEM_ID);
     }
-    if (sem) sem_close(SEM_ID);
+    // if (sem){
+    //     sem_close(SEM_ID);
+    // }
 
     printf("Final value: ");
     printfd(global);
@@ -50,8 +60,8 @@ void test_sync(int argc, char *argv[]) {
     printf("CREATING PROCESSES...(WITH SEM)");
     enter();
 
-    char *argv1[] = {"incA &", "1", "1", "1000"};
-    char *argv2[] = {"incB &", "1", "-1", "1000"};
+    char *argv1[] = {"incA &", "1", "1", "10000"};
+    char *argv2[] = {"incB &", "1", "-1", "10000"};
 
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
         exec(&inc, 4, argv1);
@@ -67,7 +77,7 @@ void test_no_sync() {
     global = 0;
 
     printf("CREATING PROCESSES...(WITHOUT SEM)\n");
-    char **argv[] = {{"inc &", "0", "1", "1000000"}, {"inc &", "0", "-1", "1000000"}};
+    char **argv[] = {{"inc &", "0", "1", "10000"}, {"inc &", "0", "-1", "10000"}};
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
         exec(&inc, 4, argv[i % 2]);
         exec(&inc, 4, argv[i % 2 + 1]);

@@ -67,8 +67,8 @@ int stringToInt(char* str) {
 
     // Iterate through all digits
     // and update the result
-    for (; str[i] != '\0'; ++i)
-        res = res * 10 + str[i] - '0';
+    for (; str[i] != '\0'; i++)
+        res = (res * 10 + (str[i] - '0'));
 
     // Return result with sign
     return sign * res;

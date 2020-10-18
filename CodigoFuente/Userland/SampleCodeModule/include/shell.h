@@ -1,5 +1,5 @@
-#ifndef shell_h
-#define shell_h
+#ifndef SHELL_H
+#define SHELL_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,8 +30,9 @@
 #define YIELD_DESC "yield --> Ejecuta una funcion para testear la renuncia al cpu."
 #define TESTSYNC_DESC "test_sync --> Inicia el programa de testeo de semaforos"
 #define SEM_DESC "sem --> Imprime el estado de todos los semaforos"
+#define PHILO_DESC "philo --> Implementa el problema de los filosofos comensales. Imprime el estado de la mesa. Con 'a' se agrega un filosofo, con 'r' se remueve uno y con 's' se para el programa."
 
-#define COMMANDS_QTY 20
+#define COMMANDS_QTY 21
 #define COMMAND_MAX_LENGTH 50
 #define DESCRIPTION_MAX_LENGTH 300
 #define MAX_ARGUMENTS_ACCEPTED 2  //CAMBIADO DE 1 A 2
