@@ -680,7 +680,6 @@ void cat() {
     char catBuffer[65];
     unsigned int pos = 0;
     while ((c = getChar()) != '\n' && (pos < 65 - 1)) {
-        putChar(c);
         switch (c) {
             case 0:
                 break;
@@ -690,10 +689,8 @@ void cat() {
             case 1:
                 ctrl = 1;
                 break;
-            case ' ':  //no permite mas de un espacio
-                if (i > 0 && catBuffer[pos - 1] != ' ') {
-                    catBuffer[pos++] = ' ';
-                }
+            case ' ':
+                catBuffer[pos++] = ' ';
                 break;
             case '\b':
             case '\t':
@@ -708,6 +705,7 @@ void cat() {
         }
     }
     printf(catBuffer);
+    putChar('\n');
     my_exit();
 }
 
@@ -729,6 +727,6 @@ void wc() {
     char aux[20];
     intToStr(cant, aux);
     printf(aux);
-    enter();
+    putChar('\n');
     my_exit();
 }
