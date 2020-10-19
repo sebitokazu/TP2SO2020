@@ -1,3 +1,4 @@
+IMP=BITMAP
 
 all:  bootloader kernel userland image
 
@@ -5,7 +6,7 @@ bootloader:
 	cd Bootloader; make all
 
 kernel:
-	cd Kernel; make all
+	cd Kernel; make all IMP=$(IMP)
 
 userland:
 	cd Userland; make all

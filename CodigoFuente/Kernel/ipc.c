@@ -1,5 +1,4 @@
 #include "pipe.h"
-
 #include "semaphores.h"
 
 typedef struct pipe_list {
@@ -243,7 +242,7 @@ void sem_close(const char* name) {
 
     if (temp != NULL && temp->sem == sem) {
         semaphore_list = temp->next;
-        my_free(sem->chain);
+        deleteQueue(sem->chain);
         my_free(sem);
         my_free(temp);
         return;
@@ -256,7 +255,7 @@ void sem_close(const char* name) {
 
     prev->next = temp->next;
 
-    my_free(sem->chain);
+    deleteQueue(sem->chain);
     my_free(sem);
     my_free(temp);
     return;

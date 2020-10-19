@@ -59,3 +59,12 @@ int dequeue(LLQueue* q) {
 int isEmpty(LLQueue* q) {
     return q->front == NULL;
 }
+
+int deleteQueue(LLQueue* q) {
+    QNode* aux = q->rear;
+    while (aux != NULL) {
+        my_free(aux);
+        aux = aux->next;
+    }
+    my_free(q);
+}

@@ -5,8 +5,8 @@
 #include "test_util.h"
 #include "windowManager.h"
 
-#define MAX_BLOCKS 4096
-#define MAX_MEMORY 1024 * 4096 * 0.8  //Should be around 80% of memory managed by the MM
+#define MAX_BLOCKS 1024
+#define MAX_MEMORY 1024 * 1024 * 0.8  //Should be around 80% of memory managed by the MM
 
 typedef struct MM_rq {
     void *address;
@@ -25,13 +25,18 @@ void test_mm() {
         // Request as many blocks as we can
         while (rq < MAX_BLOCKS && total < MAX_MEMORY) {
             mm_rqs[rq].size = GetUniform(MAX_MEMORY - total - 1) + 1;
+            printfd(mm_rqs[rq].size);
+            enter();
             mm_rqs[rq].address = malloc(mm_rqs[rq].size);  // TODO: Port this call as required
             //TODO: check if NULL
+            if (mm_rqs[rq].address == NULL) {
+                printf("Porque?");
+            }
             total += mm_rqs[rq].size;
             rq++;
         }
-        //printf("Reserve");
-        //busy_wait(1000000000);
+        printf("Reserve. Busy wait...");
+        busy_wait(1000000000);
         // Set
         uint32_t i;
         for (i = 0; i < rq; i++)
@@ -49,7 +54,7 @@ void test_mm() {
             if (mm_rqs[i].address != NULL)
                 free(mm_rqs[i].address);  // TODO: Port this call as required
 
-        //printf("Libere");
-        // busy_wait(1000000000);
+        printf("Libere. Busy wait...");
+        busy_wait(1000000000);
     }
 }

@@ -82,6 +82,7 @@ void* initializeKernelBinary() {
 }
 
 int main() {
+    initialize_memory();
     initializeVideoMode();
     load_idt();
     setUp_syscalls();
@@ -100,6 +101,5 @@ int init() {
     int count = 0;
     while (1) {
         _hlt();
-        //if (count++ % 40 == 0) drawWord("Hola");
     }
 }

@@ -13,6 +13,7 @@ typedef struct LLQueue {
 } LLQueue;
 
 LLQueue* createLLQueue();
+int deleteQueue(LLQueue* q);
 void enqueue(LLQueue* q, int k);
 int dequeue(LLQueue* q);
 int isEmpty(LLQueue* q);

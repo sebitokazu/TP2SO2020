@@ -5,13 +5,10 @@ https://www.geeksforgeeks.org/dining-philosopher-problem-using-semaphores/
 
 #include "philo.h"
 
-int state[MAX_PHILOS];          //malloc
-int phil[N] = {0, 1, 2, 3, 4};  //CREO QUE NO ES NECESARIO
+int state[MAX_PHILOS];  //malloc
 static int phil_pids[MAX_PHILOS] = {-1};
-static int current = 0;
 
-int philos_number = N;
-int mutex;              //not used
+int philos_number = N;  //not used
 char S[MAX_PHILOS][5];  //malloc
 
 void sleep(int n) {
@@ -118,10 +115,7 @@ void philo() {  //void philo()
     char c;
     //pthread_t thread_id[N];
 
-    // initialize the semaphores
-    mutex = sem_open("mutex", 1);
-
-    if (mutex == -1)
+    if (sem_open("mutex", 1) == -1)
         printf("ERROR WHILE OPENING SEM");
 
     for (i = 0; i < N; i++) {

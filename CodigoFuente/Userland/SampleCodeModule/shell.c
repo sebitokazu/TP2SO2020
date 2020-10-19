@@ -196,10 +196,15 @@ void initShell() {
                         }
                         break;
                     case 15:  //testmm
-                        if (arg_qty != 0)
+                        if (arg_qty > 1)
                             printf(INVALID_ARGUMENTS_MSG);
                         else {
-                            char* name[] = {"test_mm"};
+                            char* name[10];
+                            if (command_arguments[1][0] == '&')
+                                *name = "test_mm &";
+                            else
+                                *name = "test_mm";
+
                             exec(&test_mm, 1, name);
                         }
                         break;
@@ -276,14 +281,11 @@ void initShell() {
                         }
                         break;
                     case 20:
-                        if (arg_qty > 1)
+                        if (arg_qty != 0)
                             printf(INVALID_ARGUMENTS_MSG);
                         else {
                             char* name[11];
-                            if (command_arguments[1][0] == '&')
-                                *name = "consumer &";
-                            else
-                                *name = "consumer";
+                            *name = "consumer";
 
                             exec(&consumer, 1, name);
                         }
