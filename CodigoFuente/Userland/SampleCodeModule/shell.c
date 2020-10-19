@@ -9,7 +9,7 @@
 #include "test_sync.h"
 
 static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block", "mypid", "testmm", "testpro", "yield", "|", "producer", "consumer", "pipes", "cat", "unblock", "wc", "filter", "test_sync", "sem", "philo"};
-static char commands_description[COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC, MEM_DESC, PS_DESC, LOOP_DESC, KILL_DESC, NICE_DESC, BLOCK_DESC, MYPID_DESC, TESTMM_DESC, TESTSCH_DESC, YIELD_DESC, PIPE_BAR_DESC, PRODUCER_DESC, CONSUMER_DESC, PIPES_DESC, CAT_DESC, WC_DESC, FILTER_DESC, TESTSYNC_DESC, SEM_DESC, PHILO_DESC};
+static char commands_description[COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC, MEM_DESC, PS_DESC, LOOP_DESC, KILL_DESC, NICE_DESC, BLOCK_DESC, MYPID_DESC, TESTMM_DESC, TESTSCH_DESC, YIELD_DESC, PIPE_BAR_DESC, PRODUCER_DESC, CONSUMER_DESC, PIPES_DESC, CAT_DESC, UNBLOCK_DESC, WC_DESC, FILTER_DESC, TESTSYNC_DESC, SEM_DESC, PHILO_DESC};
 char buffer[COMMAND_MAX_LENGTH] = {0};
 static int i = 0, ctrl = 0, changedScreen = 0;
 
@@ -212,7 +212,7 @@ void initShell() {
                         if (arg_qty != 0)
                             printf(INVALID_ARGUMENTS_MSG);
                         else {
-                            char* name[] = {"test_processes"};
+                            char* name[] = {"test_processes &"};
                             exec(&test_processes, 1, name);
                         }
                         break;

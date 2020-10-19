@@ -1,6 +1,6 @@
 # TP2SO2020
 
-_Implementacion de MM con Bitmap y de Scheduler RR sin prioridades._
+_Construcción del Núcleo de un Sistema Operativo y estructuras de administración de recursos._
 
 ## Instrucciones de instalacion
 
@@ -25,8 +25,17 @@ user@linux:$ make all
 From the x64BareBones project directory run:
 
 ```
-user@linux:\$ make all
+user@linux:\$ make all IMP=BUDDY
 ```
+
+to compile with the BUDDY memory manager
+or run
+
+```
+user@linux:\$ make all IMP=BITMAP
+```
+
+to compile with the BITMAP memory manager
 
 4- Run the kernel
 
