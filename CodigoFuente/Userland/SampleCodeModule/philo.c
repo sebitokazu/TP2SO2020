@@ -10,7 +10,7 @@ int phil[N] = { 0, 1, 2, 3, 4 };	//CREO QUE NO ES NECESARIO
 
 int philos_number = N;
 int mutex; //not used
-char *S[MAX_PHILOS];	//malloc
+char S[MAX_PHILOS][5];	//malloc
 
 void sleep(int n) {
     long i;
@@ -67,12 +67,6 @@ void put_fork(int phnum)
 	// state that thinking 
 	state[phnum] = THINKING; 
 
-	// enter();
-	// printf("Mine: "); printfd(phnum); enter();
-	// printf("Left: "); printfd(LEFT); enter();
-	// printf("Right: "); printfd(RIGHT); enter();
-	// sleep(2);
-
 	test(LEFT); 
 	test(RIGHT); 
 
@@ -81,34 +75,24 @@ void put_fork(int phnum)
 
 void* philospher(/*void* num*/ int phnum) 
 { 
-	printf("  PHILO: ");printfd(phnum);enter();
 	while (1) { 
-		// int* i = num; 
-
 		sleep(1); 
 
-		//take_fork(*i); 
 		take_fork(phnum);
 
-		
 		print_table();
-		//enter(); ps(); enter(); enter();
 
 		sleep(0); 
 
-		//put_fork(*i);
 		put_fork(phnum);
 
-
 		print_table();
-		//enter(); ps(); enter(); enter();
-
 	} 
 } 
 
 
 void new_philo(int i){
-	char aux[3];
+	char aux[4];
 
 	/* create semaphore */
 	state[i] = THINKING;	//set philo's state
@@ -132,9 +116,6 @@ void new_philo(int i){
 	
 	char *name[] = {"p &"};
 	itoa(i, aux);
-	printfd(i);
-	printf(aux);
-	printf(" ");
 	char *par[] = {aux};
 	char *argv[] = {"p &", par};
 	exec(&philospher, i, argv);		//REVISAR SEGUNDO PARAM
@@ -163,17 +144,17 @@ void philo() { //void philo()
 	while ((c = getChar()) != 'q'){
 		
 		if(c == 'a' && philos_number < MAX_PHILOS){
-			sem_wait(mutex);
+			sem_wait("mutex");
 			new_philo(philos_number);
 			philos_number++;
-			sem_post(mutex);
+			sem_post("mutex");
 		}
 
 		if(c == 'r' && philos_number > 0){
-			sem_wait(mutex);
+			sem_wait("mutex");
 			philos_number--;
 			sem_close(S[philos_number]);	//matar proceso
-			sem_post(mutex);
+			sem_post("mutex");
 		}
 
 		if(c == 't')

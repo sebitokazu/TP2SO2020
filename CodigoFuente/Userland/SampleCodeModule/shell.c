@@ -235,7 +235,7 @@ void initShell() {
                         if (arg_qty != 0)
                             printf(INVALID_ARGUMENTS_MSG);
                         else {
-                            char* name[] = {"philo &"};
+                            char* name[] = {"philo"}; //sacarle el & 
                             exec(&philo, 1, name);
                         }
                         break;
