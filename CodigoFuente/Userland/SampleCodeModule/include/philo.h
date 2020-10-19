@@ -10,8 +10,8 @@
 #define THINKING 2 
 #define HUNGRY 1 
 #define EATING 0 
-#define LEFT (phnum + philos_number - 1) % N 
-#define RIGHT (phnum + 1) % N
+#define LEFT (phnum + philos_number - 1) % philos_number 
+#define RIGHT (phnum + 1) % philos_number
 
 void philo();
 

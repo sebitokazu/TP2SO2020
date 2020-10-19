@@ -30,7 +30,7 @@
 #define YIELD_DESC "yield --> Ejecuta una funcion para testear la renuncia al cpu."
 #define TESTSYNC_DESC "test_sync --> Inicia el programa de testeo de semaforos"
 #define SEM_DESC "sem --> Imprime el estado de todos los semaforos"
-#define PHILO_DESC "philo --> Implementa el problema de los filosofos comensales. Imprime el estado de la mesa. Con 'a' se agrega un filosofo, con 'r' se remueve uno y con 's' se para el programa."
+#define PHILO_DESC "philo --> Implementa el problema de los filosofos comensales. Imprime el estado de la mesa. Con 'a' se agrega un filosofo, con 'r' se remueve uno y con 'q' se para el programa."
 
 #define COMMANDS_QTY 21
 #define COMMAND_MAX_LENGTH 50

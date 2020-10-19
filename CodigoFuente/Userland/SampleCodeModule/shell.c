@@ -236,7 +236,7 @@ void initShell() {
                             printf(INVALID_ARGUMENTS_MSG);
                         else {
                             char* name[] = {"philo &"};
-                            //exec(&philo, 1, name);
+                            exec(&philo, 1, name);
                         }
                         break;
                     default: //not possible
