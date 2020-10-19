@@ -34,8 +34,6 @@ void test(int phnum)
 		// used to wake up hungry philosophers 
 		// during putfork 
 		sem_post(S[phnum]); 
-		if(phnum == 0)
-			printf("siiiiiii");
 
 	} 
 } 
@@ -54,13 +52,8 @@ void take_fork(int phnum)
 
 	sem_post("mutex"); 
 
-	if(phnum == 0)
-		printf("PAN");
 	// if unable to eat wait to be signalled 
 	sem_wait(S[phnum]);
-	if(phnum == 0)
-		printf("QUESO");
- 
 
 	sleep(1); 
 } 
@@ -94,10 +87,8 @@ void* philospher(/*void* num*/ int phnum)
 
 		sleep(1); 
 
-		printf("			Philo"); printfd(phnum); printf(" TRIES"); enter();
 		//take_fork(*i); 
 		take_fork(phnum);
-		printf("			Philo"); printfd(phnum); printf(" GETS"); enter();
 
 		
 		print_table();
@@ -106,9 +97,7 @@ void* philospher(/*void* num*/ int phnum)
 		sleep(0); 
 
 		//put_fork(*i);
-		printf("			Philo"); printfd(phnum); printf(" PUTS"); enter();
 		put_fork(phnum);
-		printf("			Philo"); printfd(phnum); printf(" LEAVES"); enter();
 
 
 		print_table();
