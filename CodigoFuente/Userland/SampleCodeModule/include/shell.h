@@ -7,7 +7,7 @@
 #include "types.h"
 #include "windowManager.h"
 
-#define PROMPT_MSG "ratti-galende@shell-service: "
+#define PROMPT_MSG "infocracks@shell-service: "
 #define COMMAND_NOT_FOUND_MSG "Command not found :("
 #define INVALID_ARGUMENTS_MSG "Invalid arguments!"
 #define NOT_PIPEABLE_MSG "Some of the programs can't be piped"
@@ -37,8 +37,11 @@
 #define UNBLOCK_DESC "unblock --> Cambia el estado de un proceso a listo dado su ID."
 #define WC_DESC "wc --> Cuenta la cantidad de líneas del input."
 #define FILTER_DESC "filter --> Filtra las vocales del input"
+#define TESTSYNC_DESC "test_sync --> Inicia el programa de testeo de semaforos"
+#define SEM_DESC "sem --> Imprime el estado de todos los semaforos"
+#define PHILO_DESC "philo --> Implementa el problema de los filosofos comensales. Imprime el estado de la mesa. Con 'a' se agrega un filosofo, con 'r' se remueve uno y con 'q' se para el programa."
 
-#define COMMANDS_QTY 26
+#define COMMANDS_QTY 29
 #define COMMAND_MAX_LENGTH 50
 #define DESCRIPTION_MAX_LENGTH 300
 #define MAX_ARGUMENTS_ACCEPTED 2  //CAMBIADO DE 1 A 2

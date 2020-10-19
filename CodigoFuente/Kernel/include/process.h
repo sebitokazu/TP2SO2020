@@ -33,6 +33,5 @@ typedef struct process {
 
 process* createProcess(void* entry_point, int argc, char* argv[], int pipe_role);
 void freeProcess(process* process);
-void yield();
 
 #endif

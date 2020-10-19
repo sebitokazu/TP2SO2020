@@ -278,3 +278,7 @@ int changePriority(qword pid, int priority) {
         aux->cpuUsedTime = 0;
     }
 }
+
+void yield() {
+    forceTT();
+}

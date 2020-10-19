@@ -97,6 +97,21 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
         case 28:
             closePipe((const char *)rsi, getCurrentPID());
             break;
+        case 29:
+            return sem_open((const char *)rsi, rdx);
+            break;
+        case 30:
+            sem_close((const char *)rsi);
+            break;
+        case 31:
+            sem_wait((const char *)rsi);
+            break;
+        case 32:
+            sem_post((const char *)rsi);
+            break;
+        case 33:
+            printSemaphoreState();
+            break;
         default:
             break;
     }

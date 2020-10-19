@@ -2,7 +2,7 @@ GLOBAL cpuVendor
 GLOBAL getKeyboardScancode
 GLOBAL checkIfFindCharacter
 GLOBAL forceTimerTick
-
+GLOBAL _xchg
 
 section .text
  
@@ -60,3 +60,7 @@ forceTimerTick:
 
     ret
 
+_xchg:
+    mov rax, rsi
+    xchg [rdi], eax
+    ret
