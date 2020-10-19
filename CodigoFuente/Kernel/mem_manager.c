@@ -285,6 +285,8 @@ void my_free(void *ptr) {
                 block_arrays_free_spaces[i] -= 2;
                 block_arrays_sizes[i] -= 2;
                 block_arrays_free_spaces[i - 1]++;
+                block_arrays_sizes[i - 1]++;
+
 
                 i--;  //So it can check if its uncle is free
                       // Remember that j = parent_idx;
