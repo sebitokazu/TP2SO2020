@@ -6,8 +6,8 @@
 #include "test_mm.h"
 #include "test_processes.h"
 
-static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block", "mypid", "testmm", "testpro", "yield", "|", "producer", "consumer", "pipes", "cat", "unblock", "wc"};
-static char commands_description[COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC, MEM_DESC, PS_DESC, LOOP_DESC, KILL_DESC, NICE_DESC, BLOCK_DESC, MYPID_DESC, TESTMM_DESC, TESTSCH_DESC, YIELD_DESC, PIPE_BAR_DESC, PRODUCER_DESC, CONSUMER_DESC, PIPES_DESC, CAT_DESC, WC_DESC};
+static char commands[COMMANDS_QTY][COMMAND_MAX_LENGTH] = {"help", "exceptions", "inforeg", "printmem", "systime", "processor-temp", "processor-info", "clear", "mem", "ps", "loop", "kill", "nice", "block", "mypid", "testmm", "testpro", "yield", "|", "producer", "consumer", "pipes", "cat", "unblock", "wc", "filter"};
+static char commands_description[COMMANDS_QTY][DESCRIPTION_MAX_LENGTH] = {HELP_DESC, EXCEPTIONS_DESC, INFOREG_DESC, PRINTMEM_DESC, SYSTIME_DESC, PROCESSOR_TEMP_DESC, PROCESSOR_INFO_DESC, CLEAR_DESC, MEM_DESC, PS_DESC, LOOP_DESC, KILL_DESC, NICE_DESC, BLOCK_DESC, MYPID_DESC, TESTMM_DESC, TESTSCH_DESC, YIELD_DESC, PIPE_BAR_DESC, PRODUCER_DESC, CONSUMER_DESC, PIPES_DESC, CAT_DESC, WC_DESC, FILTER_DESC};
 char buffer[COMMAND_MAX_LENGTH] = {0};
 static int i = 0, ctrl = 0, changedScreen = 0;
 
@@ -247,6 +247,11 @@ void initShell() {
                                             char* _wc[] = {"wc"};
                                             name[k - 1] = _wc;
                                             break;
+                                        case 25:
+                                            prog[k - 1] = &filter;
+                                            char* _filter[] = {"filter"};
+                                            name[k - 1] = _filter;
+                                            break;
                                         default:
                                             is_pipeable = 0;
                                             break;
@@ -308,6 +313,15 @@ void initShell() {
                             char* name[3];
                             *name = "wc";
                             exec(&wc, 1, name);
+                        }
+                        break;
+                    case 25:
+                        if (arg_qty != 0)
+                            printf(INVALID_ARGUMENTS_MSG);
+                        else {
+                            char* name[7];
+                            *name = "filter";
+                            exec(&filter, 1, name);
                         }
                         break;
                 }
@@ -696,9 +710,8 @@ void cat() {
             case '\t':
                 break;
             default:
-                if (ctrl) {
-                    if (c == 'r')
-                        saveRegisters();
+                if (ctrl && c == 'f') {
+                    catBuffer[pos++] = '\n';
                 } else {
                     catBuffer[pos++] = c;
                 }
@@ -727,6 +740,47 @@ void wc() {
     char aux[20];
     intToStr(cant, aux);
     printf(aux);
+    putChar('\n');
+    my_exit();
+}
+
+char isVocal(char c) {
+    if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u')
+        return 1;
+    else
+        return 0;
+}
+
+void filter() {
+    char c = 0;
+    unsigned int cant = 0;
+    char filtered[100] = {0};
+    while ((c = getChar()) != '%' && (cant < 100 - 1)) {
+        switch (c) {
+            case 0:
+                break;
+            case -1:
+                ctrl = 0;
+                break;
+            case 1:
+                ctrl = 1;
+                break;
+            case ' ':
+                filtered[cant++] = ' ';
+                break;
+            case '\b':
+            case '\t':
+                break;
+            default:
+                if (ctrl && c == 'f') {
+                    filtered[cant++] = '%';
+                } else if (!isVocal(c)) {
+                    filtered[cant++] = c;
+                }
+                break;
+        }
+    }
+    printf(filtered);
     putChar('\n');
     my_exit();
 }

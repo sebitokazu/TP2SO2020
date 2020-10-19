@@ -36,8 +36,9 @@
 #define CAT_DESC "cat --> Imprime el stdin tal como lo recibe (no acepta backspace)"
 #define UNBLOCK_DESC "unblock --> Cambia el estado de un proceso a listo dado su ID."
 #define WC_DESC "wc --> Cuenta la cantidad de líneas del input."
+#define FILTER_DESC "filter --> Filtra las vocales del input"
 
-#define COMMANDS_QTY 25
+#define COMMANDS_QTY 26
 #define COMMAND_MAX_LENGTH 50
 #define DESCRIPTION_MAX_LENGTH 300
 #define MAX_ARGUMENTS_ACCEPTED 2  //CAMBIADO DE 1 A 2
@@ -98,6 +99,8 @@ void consumer();
 
 void cat();
 void wc();
+void filter();
+char isVocal(char c);
 
 //Loop program
 void loop();
