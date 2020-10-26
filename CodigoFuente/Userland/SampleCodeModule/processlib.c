@@ -21,8 +21,8 @@ qword getPID() {
     return syscall(19, 0, 0, 0, 0, 0);
 }
 
-void block(qword pid) {
-    syscall(20, pid, 0, 0, 0, 0);
+int block(qword pid) {
+    return syscall(20, pid, 0, 0, 0, 0);
 }
 
 void my_exit() {
@@ -33,13 +33,13 @@ void yield() {
     syscall(21, 0, 0, 0, 0, 0);
 }
 
-void nice(qword pid, qword priority) {
-    syscall(17, pid, priority, 0, 0, 0);
+int nice(qword pid, qword priority) {
+    return syscall(17, pid, priority, 0, 0, 0);
 }
 void pipe_exec(void* entry_point1, char* argv1[], void* entry_point2, char* argv2[]) {
     syscall(26, entry_point1, argv1, entry_point2, argv2, 0);
 }
 
-void unblock(qword pid) {
-    syscall(27, pid, 0, 0, 0, 0);
+int unblock(qword pid) {
+    return syscall(27, pid, 0, 0, 0, 0);
 }

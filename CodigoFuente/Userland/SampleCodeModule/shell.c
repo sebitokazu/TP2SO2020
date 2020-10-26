@@ -418,7 +418,6 @@ void loop() {
     char aux[10];
     qword pid = getPID();
     intToStr(pid, aux);
-    int i = 0;
     while (1) {
         printf("Soy ");
         printf(aux);
@@ -710,7 +709,7 @@ void consumer() {
     int res = createPipe(pipe_name);
     if (res == -1)
         my_exit();
-    int i, read = 1;
+    int i;
     char buf[COMMAND_MAX_LENGTH + 1];
     for (i = 0; i < COMMANDS_QTY; i++) {
         readPipe(pipe_name, buf, COMMAND_MAX_LENGTH);
