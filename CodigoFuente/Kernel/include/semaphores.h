@@ -19,6 +19,7 @@ void sem_close(const char* name);
 void printSemaphoreState();
 void sem_wait(const char* name);
 void sem_post(const char* name);
+int add_sem_to_list(sem_t* sem);
 
 sem_t* find_sem_by_name(const char* name);
 #endif

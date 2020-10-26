@@ -7,7 +7,7 @@
 
 typedef int bit;
 
-char *memory = 0x600000;  //revisar
+char *memory = 0x600000;
 
 bit bitmap[BLOCK_QTY] = {0};
 int blocksUsed = 0;
@@ -16,7 +16,7 @@ void *my_malloc(unsigned int size) {
     if (size == 0)
         return NULL;
 
-    int needed = (int)size / BLOCK_SIZE + (size % BLOCK_SIZE != 0 ? 1 : 0);  //habria que redondear para arriba!
+    int needed = (int)size / BLOCK_SIZE + (size % BLOCK_SIZE != 0 ? 1 : 0);
     int counter = 0;
     int i, j;
     for (i = 0; i < BLOCK_QTY && counter < needed; i++) {
@@ -49,7 +49,6 @@ void my_free(void *ptr) {
     }
 }
 
-//ver si es necesario
 void initialize_memory() {
     int i = 0;
     char *mem = memory;
@@ -81,7 +80,7 @@ void checkMemoryStatus() {
 #define MIN_BLOCK_SIZE 4096  //2^12 = 4K
 #define MIN_BLOCK_SIZE_EXP 12
 
-#define MEM_FIRST_ADDRESS 0x600000  //EN NINGUN MOMENTO NOS ASEGURAMOS DE QUE LA MEM EN ESTAS POSICIONES NO ESTE OCUPADA
+#define MEM_FIRST_ADDRESS 0x600000  
 
 void printmem2(char *s);
 void test_malloc1();
@@ -91,7 +90,7 @@ typedef struct node {
     int state;
     struct node *left;
     struct node *right;
-    struct node *parent;  //tal vez no lo usemos
+    struct node *parent;
     void *ptr;            //memory direction to be returned in malloc
     int exp;              //size = 2^exp
     int idx;              //indice donde esta guardada la estructura - mem[idx]
@@ -99,7 +98,7 @@ typedef struct node {
 } node;
 
 node mem[24600];                                                                                   //Initialized in main function (NOT ANY MORE). 24600 = nodes_qty * sizeof(node)
-static node root = {FREE, &mem[1], &mem[2], NULL, (void *)MEM_FIRST_ADDRESS, MEM_SIZE_EXP, 0, 0};  //O LO DECLARAMOS COMO *node
+static node root = {FREE, &mem[1], &mem[2], NULL, (void *)MEM_FIRST_ADDRESS, MEM_SIZE_EXP, 0, 0}; 
 void *block_arrays_ptrs[MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1];                                    //Initialized in main function.
 int block_arrays_free_spaces[MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1] = {0};                         //free nodes in level
 int block_arrays_sizes[MEM_SIZE_EXP - MIN_BLOCK_SIZE_EXP + 1] = {0};                               //number of initialized nodes (free, split, occupied) in level
@@ -146,20 +145,17 @@ unsigned int get_idx_of_next_available_node(int array_idx) {
     return ans;
 }
 
-void split_node(node *n) {  //REVISAR ESTA FUNCION (PUNTEROS, DIRECCIONES, ETC) !!!
-    //como inicializamos los hijos???
+void split_node(node *n) { 
     int i = n->idx, idx_aux = 2 * i + 1, child_arr_ptr_idx = n->array_ptr_idx + 1;
 
     mem[2 * i + 1] = *n->left;
     mem[2 * i + 2] = *n->right;
 
     n->left->state = FREE;
-    // n->left->left = mem + (2*idx_aux+1);
-    // n->left->right = mem + (2*idx_aux+2);
     n->left->left = &mem[2 * idx_aux + 1];
     n->left->right = &mem[2 * idx_aux + 2];
     n->left->parent = n;
-    n->left->ptr = n->ptr;  //chequear direccion de inicio
+    n->left->ptr = n->ptr; 
 
     n->left->exp = n->exp - 1;
     n->left->idx = idx_aux;
@@ -168,40 +164,33 @@ void split_node(node *n) {  //REVISAR ESTA FUNCION (PUNTEROS, DIRECCIONES, ETC) 
     idx_aux = 2 * i + 2;
 
     n->right->state = FREE;
-    // n->right->left = mem + (2*idx_aux+1);
-    // n->right->right = mem + (2*idx_aux+2);
     n->right->left = &mem[2 * idx_aux + 1];
     n->right->right = &mem[2 * idx_aux + 2];
     n->right->parent = n;
     n->right->ptr = n->ptr + (1 << (n->exp - 1));  //left node begin address + size of (left) block
 
-    //chequear direccion de inicio
+    
     n->right->exp = n->exp - 1;
     n->right->idx = idx_aux;
     n->right->array_ptr_idx = child_arr_ptr_idx;
 
     i = get_idx_of_next_available_node(child_arr_ptr_idx);
-    //block_arrays_ptrs[child_arr_ptr_idx] + i = (void*) n->left;
     void *p = block_arrays_ptrs[child_arr_ptr_idx];
     p += i * sizeof(node);
     p = (void *)n->left;
 
     i = get_idx_of_next_available_node(child_arr_ptr_idx);
-    //block_arrays_ptrs[child_arr_ptr_idx] + i = (void*) n->right;
     p = block_arrays_ptrs[child_arr_ptr_idx];
     p += i * sizeof(node);
     p = (void *)n->right;
 
     n->state = SPLIT;
-    //n->ptr = NULL;
 }
 
 //mem {0: 2^0, 1: 2^1, 2: 2^2} 2^5 -> 2^0+2^1+2^2+2^3+2^4 hasta 2^0+2^1+2^2+2^3+2^4+2^5-1
 
 void *my_malloc(unsigned int size_request) {
     unsigned int exp_request = exp_of_block_needed(size_request);  //We need a block of size 2^exp
-    //unsigned int current_exp = MEM_SIZE_EXP;
-    //node *current_node = &root; //no se si efectivamente apuntan a lo mismo
     unsigned int idx = MEM_SIZE_EXP - exp_request;  //Para recorrer los arreglos de bloques con tamano >= 2^exp_request
 
     if (exp_request > MEM_SIZE_EXP)
@@ -214,8 +203,6 @@ void *my_malloc(unsigned int size_request) {
         return NULL;  //idx=0 ==> todas las listas estaban vacias
 
     while (idx < MEM_SIZE_EXP - exp_request && block_arrays_sizes[idx + 1] < pow(2, idx + 1)) {  //pow(2, idx) = number of nodes at idx level
-        //HAY QUE DESCOMENTAR LA CONDICION Y RESOLVER EL PROBLEMA QUE GENERA.
-        //TAL VEZ HAYA QUE CHEQUEAR LA CONDICION ANTES DEL SPLIT, DENTRO DEL WHILE
         unsigned int i = get_idx_of_next_available_node(idx);
 
         split_node((node *)(block_arrays_ptrs[idx] + i * sizeof(node)));
@@ -263,8 +250,7 @@ void my_free(void *ptr) {
             bro = (node *)(block_arrays_ptrs[i] + k * sizeof(node));
 
             if (bro != NULL && bro->state == FREE) {
-                // block_arrays_ptrs[i] + k*sizeof(node) = NULL;
-                // block_arrays_ptrs[i] + j*sizeof(node) = NULL;
+                
 
                 n = (node *)(block_arrays_ptrs[i] + j * sizeof(node));
                 // bro already assigned

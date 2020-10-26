@@ -1,5 +1,6 @@
 #include "pipe.h"
 #include "semaphores.h"
+#include "video_driver.h"
 
 typedef struct pipe_list {
     pipe* pipe;
@@ -7,6 +8,14 @@ typedef struct pipe_list {
 } pipe_list;
 
 static pipe_list* pipes = NULL;
+
+extern uint64_t getCurrentPID();
+extern int blockProcess(uint64_t pid);
+extern int unblockProcess(uint64_t pid);
+extern void yield();
+
+void release(int* lock);
+void acquire(int* lock);
 
 int createPipe(const char* name, int pid) {
     pipe* p = getPipe(name);
@@ -28,8 +37,8 @@ int createPipe(const char* name, int pid) {
         node->pipe = p;
         node->next = pipes;
         pipes = node;
-        return 1;
     }
+    return 1;
 }
 pipe* createShellPipe(const char* name, int pid) {
     pipe* p = getPipe(name);
@@ -75,8 +84,7 @@ int writePipe(const char* name, char* str, int n) {
             pipe_sleep(getCurrentPID());
         }
         p->buffer[p->nwrite++ % MAXBUFFERLENGTH] = str[i];
-        if (str[i] == '/0')
-            break;
+    
     }
     pipe_wakeup(p);
 
@@ -92,8 +100,7 @@ int readPipe(const char* name, char* buf, int n) {
             pipe_sleep(getCurrentPID());
         }
         buf[i] = p->buffer[p->nread++ % MAXBUFFERLENGTH];
-        if (buf[i] == '/0')
-            break;
+
     }
     pipe_wakeup(p);
     return i;
@@ -118,7 +125,7 @@ void deletePipe(const char* name) {
 
     while (strcmp(current->pipe->name, name) != 0) {
         if (current->next == NULL) {
-            return NULL;
+            return;
         } else {
             prev = current;
             current = current->next;
@@ -170,7 +177,6 @@ typedef struct sem_list {
 } sem_list;
 
 sem_list* semaphore_list = NULL;
-static int cant = 0;
 
 void sem_sleep(LLQueue* p) {
     int current = getCurrentPID();
@@ -300,7 +306,6 @@ void acquire(int* lock) {
 
 void printSemaphoreWaitList(LLQueue* q) {
     char pidBuff[20];
-    int i;
     QNode* node = q->front;
     while (node != NULL) {
         intToStr(node->key, pidBuff);
@@ -312,7 +317,6 @@ void printSemaphoreWaitList(LLQueue* q) {
 
 void printSemaphoreState() {
     sem_list* current = semaphore_list;
-    int i;
     char semBuff[50];
 
     while (current != NULL) {

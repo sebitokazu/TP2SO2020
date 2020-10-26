@@ -3,8 +3,8 @@
 
 void checkMemoryStatus();
 void ps();
-void exec(void* entry_point, int argc, char* argv[]);
-void kill(qword pid);
+int exec(void* entry_point, int argc, char* argv[]);
+int kill(qword pid);
 void my_exit();
 qword getPID();
 void yield();

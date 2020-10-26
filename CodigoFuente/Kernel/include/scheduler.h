@@ -29,5 +29,8 @@ void forceTT();
 void freeAll();
 void addToFreeList(PCB* pcb);
 void yield();
+void printProcesses();
+int changePriority(qword pid, int priority);
+void addToProcessList(process* process);
 
 #endif

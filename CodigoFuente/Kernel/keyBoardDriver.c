@@ -4,6 +4,7 @@
 #include <naiveConsole.h>
 
 #include "video_driver.h"
+#include "scheduler.h"
 
 #define BUFFER_SIZE 50
 #define LEFT_CTRL 0x1D

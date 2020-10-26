@@ -9,6 +9,8 @@
 #include <syscalls.h>
 #include <video_driver.h>
 
+#include "scheduler.h"
+
 extern uint8_t text;
 extern uint8_t rodata;
 extern uint8_t data;
@@ -98,7 +100,6 @@ int main() {
 }
 
 int init() {
-    int count = 0;
     while (1) {
         _hlt();
     }

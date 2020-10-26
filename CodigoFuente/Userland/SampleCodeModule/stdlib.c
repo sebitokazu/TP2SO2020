@@ -12,29 +12,37 @@ int strlen(char* string) {
 int strcmp(char* s1, char* s2) {
     int match = 1;
     int i;
+    
     for (i = 0; s1[i] != 0 && s2[i] != 0 && match; i++) {
         if (s1[i] != s2[i])
             match = 0;
     }
+    
     if (s1[i] != 0 || s2[i] != 0)
         match = 0;
+    
     return match;
 }
 
 /*Receives a pointer to pointer where num starts and returns it as a double, having increased the pointer till it ends*/
 double stringToDouble(char* c) {
     if (c[0] == '-') return (stringToDouble(c + 1)) * -1;  // check if it is neg
+    
     /*Only positive numbers get to here*/
     double tempDouble = 0;
     char tempChar = c[0];
     int i = 1;
+    
     while (tempChar != '.' && tempChar != ' ' && tempChar != 0) {
         tempDouble = (double)(tempDouble * 10 + charToNum(tempChar));
         tempChar = c[i++];
     }
+    
     if (tempChar != '.') return tempDouble;
+    
     double tempAux;
     tempChar = c[i++];
+    
     for (int d = 1; tempChar != ' ' && tempChar != 0; d++) {
         tempAux = (double)charToNum(tempChar);
         int t = d;
@@ -43,6 +51,7 @@ double stringToDouble(char* c) {
         tempDouble += tempAux;
         tempChar = c[i++];
     }
+    
     return tempDouble;
 }
 

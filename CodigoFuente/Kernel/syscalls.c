@@ -1,12 +1,12 @@
 #include "syscalls.h"
 
-#include "applications.h"
 #include "idtLoader.h"
 #include "interrupts.h"
 #include "keyBoardDriver.h"
 #include "mem_manager.h"
 #include "scheduler.h"
 #include "video_driver.h"
+#include "semaphores.h"
 
 extern void _hlt();
 extern void *getIP();
@@ -44,7 +44,7 @@ long syscall_handler(qword rdi, qword rsi, qword rdx, qword rcx, qword r8, qword
             clearScreen();
             break;
         case 8:  //loadProgram
-            loadProgram((int)rsi, (void (*)(void))rdx);
+            //loadProgram((int)rsi, (void (*)(void))rdx);
             break;
         case 9:
             drawColouredChar((char)rsi, (int)rdx, (int)rcx, (int)r8);

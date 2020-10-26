@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "test_util.h"
+#include "processlib.h"
 
 //TO BE INCLUDED
 void endless_loop() {

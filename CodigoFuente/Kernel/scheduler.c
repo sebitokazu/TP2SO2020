@@ -211,12 +211,7 @@ uint64_t getForegroundPID() {
 void setForegroundPID(uint64_t pid) {
     foregroundPID = pid;
 }
-/*void cpuUsedTime() {
-    readyListTimeCount = seconds_elapsed();
-    uint64_t elapsed = previousTimeCount - readyListTimeCount;
-    previousTimeCount = readyListTimeCount;
-    readyList->cpuUsedTime += elapsed;
-}*/
+
 
 PCB* getPcbByPID(qword pid) {
     PCB* aux = readyList;
@@ -277,6 +272,8 @@ int changePriority(qword pid, int priority) {
         aux->priority = priority;
         aux->cpuUsedTime = 0;
     }
+    
+    return 0;
 }
 
 void yield() {

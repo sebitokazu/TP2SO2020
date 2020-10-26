@@ -60,7 +60,7 @@ int isEmpty(LLQueue* q) {
     return q->front == NULL;
 }
 
-int deleteQueue(LLQueue* q) {
+void deleteQueue(LLQueue* q) {
     QNode* aux = q->rear;
     while (aux != NULL) {
         my_free(aux);

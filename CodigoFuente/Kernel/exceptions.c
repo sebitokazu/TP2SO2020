@@ -1,4 +1,3 @@
-#include "applications.h"
 #include "video_driver.h"
 
 #define ZERO_EXCEPTION_ID 0
@@ -24,7 +23,7 @@ static void zero_division(void *rsp) {
     drawWord("Register state when the exception happened: ");
     jumpLine();
     printRegisters((qword*)rsp);
-	restartCurrentProgram();
+	// restartCurrentProgram();
 }
 
 static void invalid_opcode(void *rsp){
@@ -33,7 +32,7 @@ static void invalid_opcode(void *rsp){
     drawWord("Register state when the exception happened: ");
     jumpLine();
     printRegisters((qword*)rsp);
-	restartCurrentProgram();
+	// restartCurrentProgram();
 }
 
 

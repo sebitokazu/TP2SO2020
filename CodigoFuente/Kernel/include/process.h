@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include "video_driver.h"
 #include "pipe.h"
 
 #define READY 0
@@ -33,5 +34,6 @@ typedef struct process {
 
 process* createProcess(void* entry_point, int argc, char* argv[], int pipe_role);
 void freeProcess(process* process);
+int isBackgroundProcess(char *name);
 
 #endif

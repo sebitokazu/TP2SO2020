@@ -5,11 +5,11 @@ https://www.geeksforgeeks.org/dining-philosopher-problem-using-semaphores/
 
 #include "philo.h"
 
-int state[MAX_PHILOS];  //malloc
+int state[MAX_PHILOS];
 static int phil_pids[MAX_PHILOS] = {-1};
 
-int philos_number = N;  //not used
-char S[MAX_PHILOS][5];  //malloc
+int philos_number = N;
+char S[MAX_PHILOS][5];
 
 void sleep(int n) {
     long i;
@@ -89,31 +89,21 @@ void new_philo(int i) {
     S[i][1] = aux[0];
     S[i][2] = aux[1];
     S[i][3] = aux[2];
-    //podria hacer name+1 = aux
 
     if (sem_open(S[i], 0) == -1)
         printf("ERROR WHILE OPENING SEM");
 
     /* create philosopher processes */
-    ///pthread_create(&thread_id[i], NULL, philospher, &phil[i]);
-    // name[0] = 'p';
-    // itoa(i, aux);
-    // name[1] = aux[0];
-    // name[2] = ' ';
-    // name[3] = '&';
-
     char *name[] = {"p &"};
     itoa(i, aux);
     char *par[] = {aux};
     char *argv[] = {"p &", par};
-    phil_pids[i] = exec(&philospher, i, argv);  //REVISAR SEGUNDO PARAM
-    //ps();
+    phil_pids[i] = exec(&philospher, i, argv);
 }
 
-void philo() {  //void philo()
+void philo() {
     int i;
     char c;
-    //pthread_t thread_id[N];
 
     if (sem_open("mutex", 1) == -1)
         printf("ERROR WHILE OPENING SEM");
@@ -122,7 +112,6 @@ void philo() {  //void philo()
         new_philo(i);
     }
 
-    /* REVISAR */
     while ((c = getChar()) != 'q') {
         if (c == 'a' && philos_number < MAX_PHILOS) {
             sem_wait("mutex");
@@ -152,8 +141,6 @@ void philo() {  //void philo()
     sem_post("mutex");
     sem_close("mutex");
 
-    // ADEMAS DEBERIAMOS VER QUE LA SHELL Y PHILO (este while)
-    //	NO LE ROBE TIEMPO A LOS PROCESOS P (filosofos)
     my_exit();
 }
 

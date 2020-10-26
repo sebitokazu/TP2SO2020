@@ -3,6 +3,8 @@
 
 #include "semaphore_lib.h"
 #include "stdio.h"
+#include "stdlib.h"
+#include "processlib.h"
 //#include "windowManager.h"
 
 #define N 5
@@ -13,6 +15,9 @@
 #define LEFT (phnum + philos_number - 1) % philos_number
 #define RIGHT (phnum + 1) % philos_number
 
+extern void enter();
+
 void philo();
+void print_table();
 
 #endif

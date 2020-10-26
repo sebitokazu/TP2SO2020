@@ -46,13 +46,8 @@ modeInfo *screen_info = (modeInfo *)0x5C00;
 
 //Pointers to screens
 static int currentX, currentY;
-static int currentScreen = 0;  //0 if upper screen, 1 down screen
 static int drawingChar = 0;
 static int twinkleOn = 0;
-
-//Matrix representing char positions
-static struct colouredChar firstScreen[41][113] = {};
-static struct colouredChar secondScreen[41][113] = {};
 
 static struct colouredChar mappedScreen[82][113] = {};
 
@@ -142,7 +137,7 @@ void drawChar(char c) {
     saveChar(currentY / 9, currentX / 9, c, 255, 255, 255);
     for (col = 0; col < 8; col++) {
         for (row = 0; row < 8; row++) {
-            if (font8x8_basic[c][col] & 1 << row) {
+            if (font8x8_basic[(unsigned char)c][col] & 1 << row) {
                 printPixel((currentX) + row, (currentY) + col);
             }
         }
@@ -165,7 +160,7 @@ void drawColouredChar(char c, int r, int g, int b) {
     saveChar(currentY / 9, currentX / 9, c, r, g, b);
     for (col = 0; col < 8; col++) {
         for (row = 0; row < 8; row++) {
-            if (font8x8_basic[c][col] & 1 << row) {
+            if (font8x8_basic[(unsigned char)c][col] & 1 << row) {
                 printColouredPixel((currentX) + row, (currentY) + col, r, g, b);
             }
         }
@@ -180,24 +175,6 @@ void drawColouredChar(char c, int r, int g, int b) {
 }
 
 void scrollScreen() {
-    /* int i,j;
-    struct colouredChar *c;
-    //delete all screen information
-    for(i=0; i<WIDTH; i++)
-        for(j=0; j<HEIGHT-1; j++)
-            deletePixel(i,j);
-    //Rewrite chars starting from second row
-    currentX=0; currentY=0;
-    for(i=1; i<83; i++)
-        for(j=0; j<113; j++){
-            c = &(mappedScreen[i][j]);
-            drawColouredChar(c->c, c->r, c->g, c->b);
-        }
-    //Delete chars from last row
-    for(i=0;i<113;i++){
-        c = &(mappedScreen[80][i]);
-        c->c = 0; c->r=0; c->g=0; c->b=0;
-    }*/
     char *pos;
     char *next_pos;
     for (int i = 0; i < HEIGHT; i++) {

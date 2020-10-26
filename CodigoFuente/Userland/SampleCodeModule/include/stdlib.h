@@ -15,5 +15,6 @@ int intToStr(int x, char str[]);
 
 void floatToString(float n, char* res, int afterpoint);
 
+int itoa(int x, char str[]);
 
 #endif /* stdlib_h */

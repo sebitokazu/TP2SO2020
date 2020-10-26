@@ -85,12 +85,13 @@ void initShell() {
                             helpUser();
                         break;
                     case 1:  //exceptions
-                        if (arg_qty != 1)
+                        /*if (arg_qty != 1)
                             printf(INVALID_ARGUMENTS_MSG);
                         else {
                             i = 0;  //antes de la excepcion!!!
                             handle_exception(command_arguments[1][0]);
-                        }
+                        }*/
+                        printf("Not implemented");
                         break;
                     case 2:  //inforef
                         if (arg_qty != 0)
@@ -147,7 +148,7 @@ void initShell() {
                     case 10:  //loop
                         if (arg_qty > 1)
                             printf(INVALID_ARGUMENTS_MSG);
-                        else {  //ver lo de fg y bg
+                        else {
                             char* name[7];
                             if (command_arguments[1][0] == '&')
                                 *name = "loop &";
@@ -360,8 +361,7 @@ void initShell() {
         i = 0;
         enter();
     }
-    //initShell();  //Podriamos hacer un while(1) que abarque todo el codigo
-    //de initShell() para evitar la recursion infinita de funciones
+    
 }
 
 /* inedxOf: Busca un string en un vector de strings.
@@ -686,8 +686,12 @@ int hexCharToInt(char c) {
             return -1;
     }
 }
+
 /*Fin funciones printmem*/
+
+
 const char* pipe_name = "example";
+
 /* Inicio funciones producer-consumer*/
 void producer() {
     int res = createPipe(pipe_name);
@@ -718,6 +722,7 @@ void consumer() {
 }
 
 /* Fin funciones producer-consumer*/
+
 
 void cat() {
     char c = 0;
@@ -754,23 +759,22 @@ void cat() {
 
 void wc() {
     char c = 0;
-    unsigned int cant = 0;
+    unsigned int cant = 1;
+    char aux[20];
     while ((c = getChar()) != '$') {
         switch (c) {
             case '\n':
                 cant++;
                 break;
             default:
-                if (ctrl)
-                    if (c == 'r')
-                        saveRegisters();
+                break;        
         }
     }
-    printf("Cantidad de lineas:");
-    char aux[20];
+    printf("Cantidad de lineas: ");
     intToStr(cant, aux);
     printf(aux);
     putChar('\n');
+    putChar('$');
     my_exit();
 }
 
