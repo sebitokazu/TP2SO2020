@@ -30,11 +30,13 @@ void inc(int argc, char *argv[]) {
         my_exit();
     }
     for (i = 0; i < N; i++) {
-        sem_wait(SEM_ID);
+        if (sem)
+            sem_wait(SEM_ID);
 
         slowInc(&global, value);
 
-        sem_post(SEM_ID);
+        if (sem)
+            sem_post(SEM_ID);
     }
     // if (sem){
     //     sem_close(SEM_ID);
@@ -55,8 +57,8 @@ void test_sync(int argc, char *argv[]) {
     printf("CREATING PROCESSES...(WITH SEM)");
     enter();
 
-    char *argv1[] = {"incA &", "1", "1", "10000"};
-    char *argv2[] = {"incB &", "1", "-1", "10000"};
+    char *argv1[] = {"incA &", "1", "1", "1000"};
+    char *argv2[] = {"incB &", "1", "-1", "1000"};
 
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
         exec(&inc, 4, argv1);
@@ -72,9 +74,12 @@ void test_no_sync() {
     global = 0;
 
     printf("CREATING PROCESSES...(WITHOUT SEM)\n");
-    char **argv[] = {{"inc &", "0", "1", "10000"}, {"inc &", "0", "-1", "10000"}};
+    char *argv1[] = {"incA &", "0", "1", "1000"};
+    char *argv2[] = {"incB &", "0", "-1", "1000"};
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-        exec(&inc, 4, argv[i % 2]);
-        exec(&inc, 4, argv[i % 2 + 1]);
+        exec(&inc, 4, argv1);
+        exec(&inc, 4, argv2);
     }
+
+    my_exit();
 }

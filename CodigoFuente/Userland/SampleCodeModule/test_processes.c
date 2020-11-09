@@ -1,31 +1,31 @@
 #include <stdio.h>
 
-#include "test_util.h"
 #include "processlib.h"
+#include "test_util.h"
 
 //TO BE INCLUDED
-void endless_loop() {
+static void endless_loop() {
     while (1)
         ;
     my_exit();
 }
 
-uint32_t my_create_process(char* name) {
+static uint32_t my_create_process(char* name) {
     char* argv[] = {"endless_loop &"};
 
     int res = exec(&endless_loop, 1, argv);
     return res;
 }
 
-uint32_t my_kill(uint32_t pid) {
+static uint32_t my_kill(uint32_t pid) {
     return kill(pid);
 }
 
-uint32_t my_block(uint32_t pid) {
+static uint32_t my_block(uint32_t pid) {
     return 0;
 }
 
-uint32_t my_unblock(uint32_t pid) {
+static uint32_t my_unblock(uint32_t pid) {
     return 0;
 }
 

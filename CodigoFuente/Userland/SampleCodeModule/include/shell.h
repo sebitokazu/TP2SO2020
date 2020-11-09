@@ -40,8 +40,10 @@
 #define TESTSYNC_DESC "test_sync --> Inicia el programa de testeo de semaforos"
 #define SEM_DESC "sem --> Imprime el estado de todos los semaforos"
 #define PHILO_DESC "philo --> Implementa el problema de los filosofos comensales. Imprime el estado de la mesa. Con 'a' se agrega un filosofo, con 'r' se remueve uno y con 'q' se para el programa."
+#define TESTPRIO_DESC "test_prio --> Inicia el programa de testeo de prioridades."
+#define TESTNOSYNC_DESC "test_no_sync --> Inicia el programa de testeo sin semaforos"
 
-#define COMMANDS_QTY 29
+#define COMMANDS_QTY 31
 #define COMMAND_MAX_LENGTH 50
 #define DESCRIPTION_MAX_LENGTH 300
 #define MAX_ARGUMENTS_ACCEPTED 2
